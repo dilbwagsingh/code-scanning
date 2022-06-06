@@ -1,0 +1,71 @@
+@import url("https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Oswald:wght@300&display=swap");
+
+.container {
+  margin: 2rem;
+  padding: 10px;
+  height: 50vh;
+  width: 30vw;
+  min-width: fit-content;
+  min-height: fit-content;
+  transition: all 0.3s ease-out;
+  border-radius: 5px;
+}
+
+div.fields {
+  display: grid;
+  grid-template-columns: 18rem;
+  row-gap: 0.7rem;
+  align-items: center;
+  justify-content: center;
+}
+
+input[type="text"],
+button {
+  font-family: "Oswald", sans-serif;
+  font-size: 0.8rem;
+  height: 1.5rem;
+  padding: 0px 7px 0px 7px;
+  border-radius: 3px;
+  border: 0;
+  margin: 0 0 0 1px;
+}
+
+input {
+  background-color: transparent;
+  background-color: #131812;
+  color: #0e8b99;
+  outline: 0;
+  transition: all 0.7s ease;
+}
+
+input:focus {
+  color: #e5820c;
+  outline: none;
+  border-radius: 0;
+  box-shadow: 0px 1px 0px 0px #e5820c;
+}
+
+::placeholder {
+  color: #797066;
+}
+
+button {
+  background: #131812;
+  color: #b5824e;
+  outline: 0;
+  transition: all 0.1s ease-in;
+}
+
+button:hover {
+  background: #b5824e;
+  color: #131812;
+}
+
+button.submitbtn {
+  margin: 20px 0px;
+  padding: 0 20px;
+}
+
+.voterName {
+  grid-column: 1 / span 2;
+}

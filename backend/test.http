@@ -1,0 +1,37 @@
+ GET http://localhost:3001/get-voters HTTP/1.1
+
+###
+POST http://localhost:3001/add-candidate HTTP/1.1
+Content-type: application/json
+
+{
+  "candidateName": "Luke",
+  "candidateID": "4"
+}
+
+###
+ GET http://localhost:3001/get-candidates HTTP/1.1
+
+###
+ GET http://localhost:3001/ctf-public-keys HTTP/1.1
+
+###
+GET http://localhost:3001/get-voterid HTTP/1.1
+
+###
+POST http://localhost:3001/register HTTP/1.1
+Content-type: application/json
+
+{
+  "voterName": "Mayank",
+  "voterID": "61812045af0a5f7d8a1890a8d7de1d08c189f4872857d7da4b999188856c0187"
+}
+
+###
+POST http://localhost:3001/cast-vote HTTP/1.1
+Content-type: application/json
+
+{
+  "voterID": "61812045af0a5f7d8a1890a8d7de1d08c189f4872857d7da4b999188856c0187",
+  "votedFor": "Tom"
+}

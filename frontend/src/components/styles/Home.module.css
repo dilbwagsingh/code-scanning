@@ -1,0 +1,7 @@
+.container {
+  margin: 2rem;
+  padding: 0;
+  width: 70ch;
+  min-height: fit-content;
+  color: #b5824e;
+}

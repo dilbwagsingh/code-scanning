@@ -1,0 +1,38 @@
+@import url("https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap");
+
+li,
+a {
+  font-family: "Amatic SC", cursive;
+  color: #b5824e;
+  font-size: 1.4rem;
+  text-decoration: none;
+}
+
+header {
+  display: flex;
+  justify-content: safe;
+  align-items: center;
+  background-color: transparent;
+}
+
+.nav_links {
+  list-style: none;
+}
+
+.nav_links li {
+  display: inline-block;
+  padding: 0 20px;
+}
+
+.nav_links li a {
+  transition: all 0.3s ease 0s;
+}
+
+a:hover {
+  color: #b7bec2;
+}
+
+.activeTab {
+  color: #0e8b99;
+  box-shadow: 0px 2px 0px 0px #0e8b99;
+}
