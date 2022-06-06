@@ -1,0 +1,858 @@
+spring:
+  application:
+    name: kcommunications-api
+
+server.port: 3132
+server.servlet.context-path.: /communications
+
+
+aws.kcommunication-server.region: ap-south-1
+aws.kcommunication-server.mykaarma-global-events-bus-name: arn:aws:events:ap-south-1:568579017591:event-bus/mykaarma-global-events
+aws.kcommunication-server.enabled: true
+      
+management.endpoint.metrics.enabled: true
+management.endpoints.web.exposure.include: "*"
+management.endpoint.prometheus.enabled: true
+management.metrics.export.prometheus.enabled: true
+management.metrics.distribution.percentiles[http.server.requests]: 0.95, 0.99
+management.metrics.distribution.percentiles-histogram[http.server.requests]: true
+management.metrics.distribution.sla[http.server.requests]: 500ms, 1000ms
+management.metrics.enable.jvm: true
+
+CommunicationsMessageSendConcurrentConsumers: 10
+CommunicationsMessageSendQueuePreFetchCount: 50
+CommunicationsMessageSaveConcurrentConsumers: 10
+CommunicationsMessageSaveQueuePreFetchCount: 50
+CommunicationsPostMessageSendConcurrentConsumers: 4
+CommunicationsPostMessageSendQueuePreFetchCount: 50
+CommunicationsMessageRecordingURLUpdateConcurrentConsumers: 10
+CommunicationsPostIncomingMessageSaveConcurrentConsumers: 10
+CommunicationsPostIncomingMessageSaveQueuePreFetchCount: 50
+CommunicationsPostUniversalMessageSendConcurrentConsumers: 10
+CommunicationsPostUniversalMessageSendQueuePreFetchCount: 50
+initialexpiration: 1
+multiplier: 5
+maximumretries: 6
+intialexpirationrecording: 1000
+initialexpiration.customermerging: 5000
+multiplier.customermerging: 3
+customerMongoMergeThreads: 1
+customerMergePrefetchCount: 10
+
+spring.servlet.multipart.max-file-size: 5MB
+spring.servlet.multipart.max-request-size: 5MB
+
+# twilio out-of-office bot details
+twilio:
+  botaccount:
+    sid: ENC(kDGHidn68ZBwWV09Ba0vb/6nRs8iR0wsVZODbP6GJPPs5+clU3mDL16H7Otd0VDPlcLyhV+NYcUIH8w4bXz4gVZMQoKpiuqlewHufdwtN3A=)
+    authToken: ENC(4MTGy/ORy3i6g/APYtTU2PVv/9/dfiVBUOZ0G/lWke4GAgudYEifiHkrYL1oDkMZ4J9XUhOc6+QR6MJedkET7Gyir7y2yloxSGI1WovzjhI=)
+    number: 14138488265
+
+# redis connection details
+redis.host.name: redis
+redis.port: 6379
+redis.env: devvm
+redis-sentinel1: redis:5000
+redis-sentinel2: redis:5001
+redis-sentinel3: redis:5002
+redis-password: p@ss$12E45
+redis-max-total: 400
+redis-max-idle: 100
+redis-timeout: 5000
+cache-expiry-hours: 36
+redis-master: mymaster
+
+communications-redis:
+    host-name: redis
+    port: 6379
+    password: p@ss$12E45
+    max-total: 400
+    max-idle: 100
+    timeout: 5000
+    master: mymaster
+    useSSL: false
+
+#Orakle API Config
+orakle_api_url: http://api:2862/orakle/v1/
+gvm_host_domain_name: ${HOSTNAME}.mykaarma.dev
+# APIs
+kcommunications_basic_auth_user: ENC(xzXXYGOqSYjukCbMpG4ZJxWd+zxQZkFA4my/gGbui0E4HHqFzDYDLbSbf7x1c8aUaN0RJD7bag+qfUWv+k0xcE689sfzhyFYhkUzoCcCoxw=)
+kcommunications_basic_auth_pass: ENC(9KJNDFHZgZK7in8QxMjFsVx4pQOcl9j9OIP5PGRF2FVj1jrnFYofLV/FYVkbew1EePHfLcOGmnxvLJi9ZZroE9yEtjOYZbVJfQ2ns9qoIq0=)
+appconfig.webservice.url: http://appconfig:9999/appconfig/
+kcustomer_api_url_v2: http://kcustomer-api:3129/customer/v2/
+kmanage_api_url_v2: http://kmanage-api:2853/manage/v2/
+kmessaging_api_url: http://api:2840/messaging/v2/
+outofoffice_url_v2: http://api:3271/outofoffice/v2/
+kcommunications_api_url: http://api/communications/
+korder_api_url: http://api:2839/order/v2/
+view-controller-url: http://messageviewcontroller:9995/viewapi
+opt_out_email_url: http://api:2840/messaging/v2/optOutPage/email/message/opt_out_email_uuid
+twilio.callback.url: https://${gvm_host_domain_name}/twilio/StatusCallback
+workflow_api_url: http://api:3237/workflow/v1/
+ksentiment_api_url: http://127.0.0.1:2851/sentiment/v1/
+message_redact_url: http://api:3246/optoutclassifier/predictor/v1/redact
+follow_up_api_url: http://api/leads/
+authentication_utils_api_url: http://api/authenticateAndAuthorize/v2/
+dealer_app_url: https://127.0.0.1:8888/
+
+#Notification engine configuration
+notification-engine-url: http://127.0.0.1:3212/notification
+elastic_search_base_url: http://elasticsearch:9201
+
+#spring JPA configurations
+spring.jpa.hibernate.naming_strategy: org.hibernate.cfg.EJB3NamingStrategy
+spring.jpa.hibernate.naming.physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+# Datasource Configurations
+spring.datasource:
+    mykaarma:
+        type: com.zaxxer.hikari.HikariDataSource
+        url: jdbc:mysql://db:3306/MyKaarmaVMDB?useUnicode=yes&characterEncoding=utf8&serverTimezone=PST
+        username: root
+        password: root
+        test-while-idle: true
+        test-on-borrow: true
+        validation-query: SELECT 1
+        connection-test-query: SELECT 1
+        time-between-eviction-runs-millis: 10000
+        min-evictable-idle-time-millis: 60000
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        cachePrepStmts: true
+        useServerPrepStmts: true
+        idleTimeout: 12000
+        maxLifetime: 300000
+        maximum-pool-size: 15
+        max-active: 15
+        initial-size: 5
+        max-idle: 10
+        minimum-idle: 3
+        poolName: mykaarmaDBPool
+        allowPoolSuspension: true
+        leakDetectionThreshold: 10000
+        connectionInitSql: SET NAMES 'utf8mb4'
+    communications:
+        type: com.zaxxer.hikari.HikariDataSource
+        url: jdbc:mysql://db:3306/CommunicationsDB?useUnicode=yes&characterEncoding=utf8&serverTimezone=PST
+        username: root
+        password: root
+        connection-test-query: SELECT 1
+        idleTimeout: 12000
+        maxLifetime: 300000
+        maximum-pool-size: 5
+        minimum-idle: 2
+        poolName: communicationsDBPool
+        allowPoolSuspension: true
+        leakDetectionThreshold: 10000
+        connectionInitSql: SET NAMES 'utf8mb4'    
+
+rabbitmq:
+  common:
+    host: rabbit
+    port: 5672
+    username: guest
+    password: guest
+    consumers-min: 10
+    consumers-max: 20
+    prefetch-count: 20
+    dead-letter-exchange: commonrabbit.dl
+
+  communications:
+    host: rabbit
+    port: 5672
+    username: guest
+    password: guest
+    consumers-min: 10
+    consumers-max: 20
+    prefetch-count: 20
+    dead-letter-exchange: communicationsrabbit.dl
+
+#mongo-db configurations
+mongo.userName: admin
+mongo.credDb: admin
+mongo.dataDb: kaarmadb
+mongo.password: password
+mongo.replicaHost1: mongo
+mongo.replicaHost2: mongo
+mongo.replicaPort1: 27011
+mongo.replicaPort2: 27012
+mongo.replicaHost3: mongo
+mongo.replicaPort3: 27013
+mongo.W: 1
+mongo.fsync: true
+mongo.connectionsPerHost: 10
+mongo.connectTimeout: 1000
+mongo.maxWaitTime: 1500
+mongo.socketKeepAlive: true
+mongo.socketTimeout: 3000
+mongo.threadsAllowedToBlockForConnectionMultiplier: 4
+
+cache-expiry-minutes: 3
+rate-limit-outgoing-text: 20
+rate-limit-outgoing-email: 20
+rate-limit-incoming-call: 6
+rate-limit-text-forwarding: 20
+rate-limit-bulk-outgoing-text-per-day: 200
+rate-limit-bulk-outgoing-text-per-minute: 1
+
+message-view-controller-url: http://messageviewcontroller:9995/viewapi
+feature-email-host: smtp.postmarkapp.com
+feature-email-port: 2525
+feature-email-username: 7340d662-7973-4811-95a6-525d2927584c
+feature-email-password: 7340d662-7973-4811-95a6-525d2927584c
+
+awsAccessKey: ENC(cj5vqJkH1kQjhkcnj7d8hpnfCiWI6t7SZf7tH6qUnx1zMksR5NYN2L1ZPxj249LUxp4E6OrriCcE3CedfM0+jg==)
+awsSecretKey: ENC(cn7tSsvuwehUPgO7Z67v54vkIlywkLPK0T4Mapm8G4kyNnKDFmXZkCaTbNPrjGepH1zfEnNF8xMlQkFYfCma1lVu+hMZrCXR/QDiT2sn+ps=)
+awsBucket: mk-communications-files-dev
+cfURLPrefix: https://dev-communication-files.mykaarma.com/
+
+base_url: https://${gvm_host_domain_name}/
+
+awsAccessKeyVideo: ENC(wbIajW7zxeAka9YZAJi5CgwnZtJmSf2jGnTUfoRjkmS15x9k2x8X050K3kMX83+gXIWQ0F/Zin2TVQ29ViSxjA==)
+awsSecretKeyVideo: ENC(apt97SAcQrby4tciK4hHgBn3tMAbeDZjUH7b/86FFi4K17djw1GWqaN0E2wFvOOwbiij5Kf7hDCsBzscWRVzmkNOD/1yDkFvj0n/K3h6Qkc=)
+awsVideoInputBucket: kaarmavideoinput-comm
+awsVideoOutputBucket: kaarmavideoinput-comm
+awsVideoOutputBucketUrl: https://s3.amazonaws.com/kaarmavideoinput-comm
+awsEncoderPipelineId: ENC(4QgJxr61BTNiWABsFeSujAaAj880+2DAWVFBiWZkd1IW1LdT156Lu+zGRGQQ1mdIdwW4gNEqF5ZMpsru4Qq6tw==)
+awsEncoderPresentId: ENC(h9zn9P132wP60vQqj2AC9wfT9/Ts641mAlHofIj8b4d4fK2+qT/yKoTMkkhcbGXkzRGdJHJKTKyWOpZmN8Dbjg==)
+
+
+twilio_base_url: https://${gvm_host_domain_name}/communications/twilio/
+twilio_announce_greeting_number: +13106927211
+commApiTwilioVoiceUrl: https://${gvm_host_domain_name}/communications/twilio/InboundCall
+
+#Google Speech Api
+bucket.name: mykaarma_speech_transcription
+api.key: AIzaSyB-H3_mMkeXLrDHla_vo67bqNw3Agm_908
+status.url: https://speech.googleapis.com/v1/operations/
+transcribe.url: https://speech.googleapis.com/v1/speech:longrunningrecognize
+
+out-of-office.receiver.url: http://oooreceiver:9988/outofoffice
+
+file_save_directory: /files
+kfile_save_directory: /kfiles
+temp_save_directory: /vol1/temp
+
+krulesengine.url: http://127.0.0.1:9991/kre
+
+twilioMasterAccountSid: ENC(E2kJFSL6aZbOIZk2lCe4Qb24YaJ1Ty1/fyrfvnDrpGe4Ck5QPs/xtJRUtJLFUTDNw32+ukaRi2x6GK1HYcGclWGx4cyPMuPRcQyfwzgBpuc=)
+twilioMasterAccountAuthToken: ENC(KXGlBziXQX0E/kHG9Dcerhu9+l+5RAzpAuPgBEihwICQupPHxCV4qODHdTuPMQQfZK5B4Q3fNMQdHa7R51DVVx8dFlM1IYZ3K87tnrAQp0k=)
+
+# Jasypt Config
+jasypt.encryptor.algorithm: PBEWithHMACSHA256AndAES_256
+jasypt.encryptor.key-obtention-iterations: 1000
+jasypt.encryptor.pool-size: 1
+jasypt.encryptor.provider-name: SunJCE
+jasypt.encryptor.salt-generator-classname: org.jasypt.salt.RandomSaltGenerator
+jasypt.encryptor.iv-generator-classname: org.jasypt.iv.RandomIvGenerator
+jasypt.encryptor.string-output-type: base64
+
+google.cloud.auth: ENC(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)
+---
+spring.profiles: devvm
+
+#Aws devvm configuration
+aws.kcommunication-server.accesskey: ENC(bezpWVLNvNjMpToB6oHUTRVLwoyadl0zdabbcFiYwrrWiXmAe6HckJKRAG7HtL90jFNlfPlsoacvJi5zot2M9w==)
+aws.kcommunication-server.secretkey: ENC(5eV2wgatsBywb+LuwEhsNDg/4rwPBjiSZB15WbHaIEltzozZ4LI/cNoT7Byf/URieQjNQmQ1sA+A3bJ16dQhdfuhMEeCSz/xP8Q+gp4c9hE=)
+
+
+base_url: https://${gvm_host_domain_name}/
+twilio_base_url: https://${gvm_host_domain_name}/communications/twilio/
+twilio_announce_greeting_number: +13106927211
+
+# twilio out-of-office bot details
+twilio:
+  botaccount:
+    sid: ENC(kDGHidn68ZBwWV09Ba0vb/6nRs8iR0wsVZODbP6GJPPs5+clU3mDL16H7Otd0VDPlcLyhV+NYcUIH8w4bXz4gVZMQoKpiuqlewHufdwtN3A=)
+    authToken: ENC(4MTGy/ORy3i6g/APYtTU2PVv/9/dfiVBUOZ0G/lWke4GAgudYEifiHkrYL1oDkMZ4J9XUhOc6+QR6MJedkET7Gyir7y2yloxSGI1WovzjhI=)
+    number: 14138488265
+
+#Google Speech Api
+bucket.name: mykaarma_speech_transcription
+api.key: AIzaSyB-H3_mMkeXLrDHla_vo67bqNw3Agm_908
+status.url: https://speech.googleapis.com/v1/operations/
+transcribe.url: https://speech.googleapis.com/v1/speech:longrunningrecognize
+
+commApiTwilioVoiceUrl: https://${gvm_host_domain_name}/communications/twilio/InboundCall
+
+google.cloud.auth: ENC(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)
+
+# APIs
+kcustomer_api_url_v2: http://kcustomer-api:3129/customer/v2/
+kcommunications_basic_auth_user: ENC(w6GeBog1B90cAZwcYwpTvibr2OJS5CdjRABlv5QePniKNvkpj0o0+7OHtL2rM0YmTjqQxU7NAdIZlHB2u9bYyJXk8H/xBcHdwdJ4XFhED20=)
+kcommunications_basic_auth_pass: ENC(7kh2yuNt5avaTYSx/bwOtyKuZReqIrn0i7u7VSNOs8xPRkJh3fI0nemfyrmPDpSRvOnthTF+WeCaM5gpDRrW8bb79YLIqAUf7oiE3nRzi/M=)
+appconfig.webservice.url: http://appconfig:9999/appconfig/
+kmanage_api_url_v2: http://kmanage-api:2853/manage/v2/
+kmessaging_api_url: http://api:2840/messaging/v2/
+outofoffice_url_v2: http://api:3271/outofoffice/v2/
+kcommunications_api_url: http://api/communications/
+korder_api_url: http://api:2839/order/v2/
+view-controller-url: http://messageviewcontroller:9995/viewapi
+opt_out_email_url: http://api:2840/messaging/v2/optOutPage/email/message/opt_out_email_uuid
+twilio.callback.url: https://${gvm_host_domain_name}/twilio/StatusCallback
+workflow_api_url: http://api:3237/workflow/v1/
+ksentiment_api_url: http://127.0.0.1:2851/sentiment/v1/
+message_redact_url: http://api:3246/optoutclassifier/predictor/v1/redact
+follow_up_api_url: http://api/leads/
+authentication_utils_api_url: http://api/authenticateAndAuthorize/v2/
+dealer_app_url: https://${gvm_host_domain_name}/
+
+#spring JPA configurations
+spring.jpa.hibernate.naming_strategy: org.hibernate.cfg.EJB3NamingStrategy
+# Datasource Configurations
+spring.datasource:
+    mykaarma:
+        url: jdbc:mysql://db:3306/MyKaarmaVMDB?useUnicode=yes&characterEncoding=utf8&serverTimezone=PST
+        username: root
+        password: root
+    communications:
+        url: jdbc:mysql://db:3306/CommunicationsDB?useUnicode=yes&characterEncoding=utf8&serverTimezone=PST
+        username: root
+        password: root
+
+#Rabbit-mq Configurations
+initialexpiration.customermerging: 5000
+multiplier.customermerging: 3
+customerMongoMergeThreads: 1
+customerMergePrefetchCount: 10
+rabbitmq:
+  common:
+    host: rabbit
+    port: 5672
+    username: guest
+    password: guest
+    consumers-min: 10
+    consumers-max: 20
+    prefetch-count: 20
+    dead-letter-exchange: commonrabbit.dl
+
+  communications:
+    host: rabbit
+    port: 5672
+    username: guest
+    password: guest
+    consumers-min: 10
+    consumers-max: 20
+    prefetch-count: 20
+    dead-letter-exchange: communicationsrabbit.dl
+
+
+# redis connection details  
+redis.env: devvm
+redis-sentinel1: redis:5000
+redis-sentinel2: redis:5001
+redis-sentinel3: redis:5002
+redis-password: p@ss$12E45
+redis-max-total: 400
+redis-max-idle: 100
+redis-timeout: 5000
+cache-expiry-hours: 36
+redis-master: mymaster
+
+communications-redis:
+    host-name: redis
+    port: 6379
+    password: p@ss$12E45
+    max-total: 400
+    max-idle: 100
+    timeout: 5000
+    env: devvm
+    master: mymaster
+    useSSL: false
+
+
+#mongo-db configurations
+mongo.userName: admin
+mongo.credDb: admin
+mongo.dataDb: kaarmadb
+mongo.password: password
+mongo.replicaHost1: localhost
+mongo.replicaHost2: localhost
+mongo.replicaPort1: 27011
+mongo.replicaPort2: 27012
+mongo.replicaHost3: localhost
+mongo.replicaPort3: 27013
+mongo.W: 1
+mongo.fsync: true
+mongo.connectionsPerHost: 10
+mongo.connectTimeout: 3000
+mongo.maxWaitTime: 3000
+mongo.socketKeepAlive: true
+mongo.socketTimeout: 8000
+mongo.threadsAllowedToBlockForConnectionMultiplier: 4
+
+message-view-controller-url: http://messageviewcontroller:9995/viewapi
+feature-email-host:  smtp.postmarkapp.com
+feature-email-port: 2525
+feature-email-username: 7340d662-7973-4811-95a6-525d2927584c
+feature-email-password: 7340d662-7973-4811-95a6-525d2927584c
+
+awsAccessKey: ENC(a1FaiXffRxpKM6Y6kGQj3oXlsCjeOrtfSfG+fSMJhJTwhCAkgG0Nq07aYUhN8K24Boc/nNgMKrKuukhVVSfJng==)
+awsSecretKey: ENC(CL+XPJpB4w3/X1GRlL58WbiBUk5udYNCUMMD1/ng4Ygkc2oy0ryo337YXhl2mYmKP2m4Dfkb7EK/ful3Pg4W0va1LvqKpmxtj3CJhqn+e18=)
+awsBucket: mk-communications-files-dev
+cfURLPrefix: https://dev-communication-files.mykaarma.com/
+
+awsAccessKeyVideo: ENC(Aq/BE0M25XMzyKIr7TwDPQzVWe2LoMsDq9nUra8UlMOV44c94voINvuE1OwnXSOUXx0WvIJOkgez3HHX+aB5Ow==)
+awsSecretKeyVideo: ENC(ulQpG80sm62auzTE1NYzehutAU9YGAgULUYlv8uKEuc08XQYlCN9vsCeSL1J5CblDR4TOg9b2/YQEdcTxkcdxFi41bIMfKT43HqoXuheDl8=)
+awsVideoInputBucket: kaarmavideoinput-comm
+awsVideoOutputBucket: kaarmavideoinput-comm
+awsVideoOutputBucketUrl: https://s3.amazonaws.com/kaarmavideoinput-comm
+awsEncoderPipelineId: ENC(LPm/q8bM2NoZv59FhCHjhsQ4HmiRfUP3H4R2ikgh/x41G2+nwYKv7FGrTXhk7Lk5sjXVB0dqerKdI6t3MNbyLw==)
+awsEncoderPresentId: ENC(knzTQrRfXoPGUfa6fEALF6RwPh/RuJ1yB6bRf8sSBB1umgSGw+eIioSR9Vm45Cz2TCkTGfJDfe7cm+FsDOzJcg==)
+
+twilioMasterAccountSid: ENC(P2z/L5TRY3BCvX9G1IL+Ye94BixbUplEq/D+/HNUVrzWteC4Qbx6azrTY3S1rEqIoOQDrbCfANXpAhO6XIrn6gsSZFMidb6v+YL1Z0ykoJ0=)
+twilioMasterAccountAuthToken: ENC(lLVlQpDWPds3YKUg50uzKsGIBHPmgnkAhudwBet4XY15f5PjNlMHJxdlA6YlUNMTE6Z9XWfCoXWT2xaSv9/8Fz69hXe229ZGI9TNNrpz5bE=)
+
+---
+
+spring.profiles: qa-aws
+
+#Aws qa-aws configuration
+aws.kcommunication-server.accesskey: ENC(6RZ8TtMxQNuM0WbKp/KxAFrbdtaDx+56DMLdlfnr+AzSvN+FFDdRyxo9EcKImweVfZ0SIq/DfUeBgHEyt2R50w==)
+aws.kcommunication-server.secretkey: ENC(g9r1Mh7hwenBtnmHxnRmF4/48WLg0xGH5puHE1iG6PnBndL7+06TpJEQimmDiprJGBQpFgCJoZMh1ds+AIz0Pze94R33VZvWkD6xSMbjIA4=)
+
+
+base_url: https://qa.mykaarma.com/
+twilio_base_url: https://qa-api.mykaarma.com/communications/twilio/
+twilio_announce_greeting_number: +13106927211
+
+# twilio out-of-office bot details
+twilio:
+  botaccount:
+    sid: ENC(zUSxqWcWul8nJdNhg03mSh+aR4PRzMBmyWV3TbVC8nBDHgZq0TI224NBph7b6018os8uTfXf9PlBzcZdyWtyBOn+aFXNyZW0tjWjdxHQpXo=)
+    authToken: ENC(zY49NozYiHP10cRb2kVMhBllWsoceTj+7HtyPlS7C5DUN6V9rKvg61FhnMqrelJWWExo+rF7OFNhtnepGJBbg+AUxMXHJnTZgl+BvtKm4z4=)
+    number: 13347210226
+
+#Google Speech Api
+bucket.name: mykaarma_speech_transcription
+api.key: AIzaSyB-H3_mMkeXLrDHla_vo67bqNw3Agm_908
+status.url: https://speech.googleapis.com/v1/operations/
+transcribe.url: https://speech.googleapis.com/v1/speech:longrunningrecognize
+
+out-of-office.receiver.url: http://qa-communications-lb01.mykaarma.com/outofoffice
+
+google.cloud.auth: ENC(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)
+
+commApiTwilioVoiceUrl: https://qa-api.mykaarma.com/communications/twilio/InboundCall
+
+# APIs
+kcustomer_api_url_v2: https://qa-api.mykaarma.com/customer/v2/
+kcommunications_basic_auth_user: ENC(ZoLnv1eRBaNmzZ2TDCDtEiozj54tcJmz8s5L0kZWsZ1z8Wy0D0h/pKDwgiDabJu9E4bG84jpAjS42Dt7/Nw9NUiWGy+27xE5u55A6WaBgfk=)
+kcommunications_basic_auth_pass: ENC(Hh8QLI0aCzmlypoCRwiCJYPvv22f2zm+SQXCJAlqCkMPhr1JYnl6eF224Uxd5W4Qcz7sUXajwN/VUh/yEI2lurHVxydw6Vss5QGTYj0hvUw=)
+appconfig.webservice.url: http://lb01-config.kaar-ma.com/appconfig/
+kmanage_api_url_v2: http://lb01-qa-kmanage-api.mykaarma.com/manage/v2/
+kmessaging_api_url: https://qa-api.mykaarma.com/messaging/v2/
+kcommunications_api_url: http://qa-communications-lb01.mykaarma.com/communications/
+outofoffice_url_v2: http://qa-communications-lb01.mykaarma.com/outofoffice/v2/
+korder_api_url: https://qa-api.mykaarma.com/order/v2/
+view-controller-url: http://qa-communications-lb01.mykaarma.com/viewapi
+opt_out_email_url: http://qa-api.mykaarma.com/messaging/v2/optOutPage/email/message/opt_out_email_uuid
+twilio.callback.url: https://qa-api.mykaarma.com/twilio/StatusCallback
+workflow_api_url: http://workflow-lb01.mykaarma.com/workflow/v1/
+orakle_api_url: http://qa-communications-lb01.mykaarma.com/orakle/v1/
+ksentiment_api_url: https://qa-api.mykaarma.com/sentiment/v1/
+message_redact_url: http://qa-communications-lb01.mykaarma.com/optoutclassifier/predictor/v1/redact
+follow_up_api_url: https://qa-api.mykaarma.com/leads/
+elastic_search_base_url: https://es02-qa.mykaarma.com
+authentication_utils_api_url: http://qa-lb01-auth-api.mykaarma.com/authenticateAndAuthorize/v2/
+dealer_app_url: https://qa.mykaarma.com/
+
+#Notification engine configuration
+notification-engine-url: http://qa-communications-lb01.mykaarma.com/notification
+
+#spring jpa configurations
+spring.jpa.hibernate.naming_strategy: org.hibernate.cfg.EJB3NamingStrategy
+
+# Datasource Configurations
+spring.datasource:
+    mykaarma:
+        url: jdbc:mysql://db.kaar.biz:3306/KaarmaQA?useUnicode=yes&characterEncoding=utf8&serverTimezone=PST
+        username: mk_communications_api
+        password: bUuH65ZMv5rbs8AH
+    communications:
+        url: jdbc:mysql://db.kaar.biz:3306/CommunicationsDB?useUnicode=yes&characterEncoding=utf8&serverTimezone=PST
+        username: mk_communications_api
+        password: bUuH65ZMv5rbs8AH
+
+# rabbit mq config
+initialexpiration.customermerging: 5000
+multiplier.customermerging: 3
+customerMongoMergeThreads: 1
+customerMergePrefetchCount: 10
+rabbitmq:
+  common:
+    host: qa-general-nlb-rmq.mykaarma.com
+    port: 5672
+    username: kaarmaapp
+    password: 513CE3BDB39860E9779C2AEB
+    consumers-min: 10
+    consumers-max: 20
+    prefetch-count: 20
+    dead-letter-exchange: commonrabbit.dl
+
+  communications:
+    host: qa-general-nlb-rmq.mykaarma.com
+    port: 5672
+    username: kaarmaapp
+    password: 513CE3BDB39860E9779C2AEB
+    consumers-min: 10
+    consumers-max: 20
+    prefetch-count: 20
+    dead-letter-exchange: communicationsrabbit.dl
+    
+
+# redis connection details  
+redis.env: prod
+redis-sentinel1: redis-sentinel01.nvirg.aws.mykaarma.com:26379
+redis-sentinel2: redis-sentinel02.nvirg.aws.mykaarma.com:26379
+redis-sentinel3: redis-sentinel03.nvirg.aws.mykaarma.com:26379
+redis-password: xnA5H3$fX4rv0p#2e&&j
+redis-max-total: 400
+redis-max-idle: 100
+redis-timeout: 5000
+cache-expiry-hours: 36
+redis-master: mymaster
+
+communications-redis:
+    host-name: master.qa-communication-redis.bi4azz.use1.cache.amazonaws.com
+    port: 6379
+    password: 7orzS7CBEHzct0G2
+    max-total: 400
+    max-idle: 100
+    timeout: 5000
+    env: qa-aws
+    master: mymaster
+    useSSL: true
+
+#mongo-db configurations
+mongo.userName: mk_communication_api
+mongo.credDb: admin
+mongo.dataDb: kaarmadb
+mongo.password: pWTzQqQtsP6Lfkd9
+mongo.replicaHost1: 192.168.21.181
+mongo.replicaHost2: 192.168.22.181
+mongo.replicaPort1: 27017
+mongo.replicaPort2: 27017
+mongo.replicaHost3: 192.168.21.183
+mongo.replicaPort3: 27017
+mongo.W: 1
+mongo.fsync: true
+mongo.connectionsPerHost: 10
+mongo.connectTimeout: 3000
+mongo.maxWaitTime: 3000
+mongo.socketKeepAlive: true
+mongo.socketTimeout: 8000
+mongo.threadsAllowedToBlockForConnectionMultiplier: 10
+
+message-view-controller-url: http://qa-communications-lb01.mykaarma.com/viewapi
+feature-email-host:  smtp.postmarkapp.com
+feature-email-port: 2525
+feature-email-username: bb90ea74-da36-498a-97c3-877054809930
+feature-email-password: bb90ea74-da36-498a-97c3-877054809930
+
+
+awsAccessKey: ENC(gxK7+FvHdUjmhkxI7onLId7cT+Hbv8UVk/xaFn+iiLDR11bQzhFXwpvT91QeInAaA2uu0X9f2rFmuoRcaBltpQ==)
+awsSecretKey: ENC(FjE4fJShrNNrYAWz/iXT6snhfRJsb1Ly7At8KJzhzlkkn9afiT3TgDQvOlXfSC2dqVN+/UgUgU4/I2kNExhisE9iAGAMBWHdegullBko294=)
+awsBucket: mk-communications-files-qa02
+cfURLPrefix: https://qa-communication-files.mykaarma.com/
+
+awsAccessKeyVideo: ENC(y2l1gMZBgXKsupqRDkX4bjGnP4FxNPmlovf0sWIioZP5DiJzoYYyrlSH5FifPQk+lTxkac+uI66krKwwj02qXg==)
+awsSecretKeyVideo: ENC(aMXHUQ5PPXkiBgvRF0yI4HWR9L8vHqdIRkuri7bPV48xgDtO0Mofh4pK47s0uixd/u42ibFiz7aBeHqwNj/DGzDP1i0j3iO0f6NF48Wwrx4=)
+awsVideoInputBucket: mykaarmavideoinput-qa
+awsVideoOutputBucket: mykaarmavideoinput-qa
+awsVideoOutputBucketUrl: https://s3.amazonaws.com/mykaarmavideoinput-qa
+awsEncoderPipelineId: ENC(yyTzpUyM3gU7NXPiFFjqxad7A0MTgZ65DtYTB7L/EvUc7tg0ktmT1Gt9m/IUs9yHzIEGX8oKTtjkAr8pJ77dnw==)
+awsEncoderPresentId: ENC(b8UhIf1o7GO8pnj8XNUKnKLn1LFQ2b1+anNugzHtjqbU5vmI1sl2//z6DWuJ0lEhUYigJjwCJwAXgAEBZ87f2Q==)
+
+krulesengine.url: http://qa-communications-lb01.mykaarma.com/kre
+
+twilioMasterAccountSid: ENC(e+Ews2grSLH8iAf5oUWj7qrYxgxO1R00oeu/9qgjNgdVvQ7Wh2+fcDHZesHEdTvc7K+CaKP26Kje60EpaI8SukZWC0YYv8LNIEmfS4HtLMM=)
+twilioMasterAccountAuthToken: ENC(S16x724D10puoomobyK0xGzidk9Y+0vvWu+YiQoKAWa5AnjTd7mz5/AGKZoCcBWfgnnkPseEoqJ7TONIPyA8wd7zEuCvNXbIwEqrDH4aqHY=)
+
+---
+spring.profiles: prod
+
+#Aws prod configuration
+aws.kcommunication-server.region: us-east-1
+aws.kcommunication-server.mykaarma-global-events-bus-name: arn:aws:events:us-east-1:578061096415:event-bus/mykaarma-global-events
+aws.kcommunication-server.accesskey: ENC(L/35jylAuDtagqNPifYdiZIL8vxEZQqF1EfF0L7yyX+DK24UDSgYjBGOe1XfpZBbOwUewN1Et7TgD95ySeSJAg==)
+aws.kcommunication-server.secretkey: ENC(85JPyh8ghSfd4wYqmbT0d2mufYxiWnytBH/7spESfkdWf3RO887g47l3x/q+qSk8Z5L3QQoXvZqfCGK2kylaQ+qWsvIg1PvFezTghpOVPIc=)
+
+base_url: https://app.mykaarma.com/
+twilio_base_url: https://api.mykaarma.com/communications/twilio/
+twilio_announce_greeting_number: +17149022497
+
+# twilio out-of-office bot details
+twilio:
+  botaccount:
+    sid: ENC(vdI+aegBgh9p6Hhvsyv/7Gj9Qmymu9z8X8l8KjxSerHbTwnxzcqcwDbIYRJchUTp121qBesCb/JE/Og8hOU7TEtyn3vEsa6UJkXhaDzQaD4=)
+    authToken: ENC(SYLN/bfTvsYMVbHzXgEHvTF4beWxmXOU+6/QW/t8EYjDkwEbjSU8yZMDU5tIdTm9IzNjHEQlq7SHyTuXvbcDO++9LFW5AD0Lf8nmH1A7P4o=)
+    number: 14084783858
+
+#Google Speech Api
+bucket.name: mykaarma_speech_transcription
+api.key: AIzaSyB-H3_mMkeXLrDHla_vo67bqNw3Agm_908
+status.url: https://speech.googleapis.com/v1/operations/
+transcribe.url: https://speech.googleapis.com/v1/speech:longrunningrecognize
+
+out-of-office.receiver.url: http://communications-lb01.mykaarma.com/outofoffice
+
+# APIs
+kcustomer_api_url_v2: https://api.mykaarma.com/customer/v2/
+kcommunications_basic_auth_user: ENC(XgDntGkR9YyGLDmM1+wQUHOzDRvFmFpSyy55aHOOt1g7eKwYtjvJ/8tQt94RlUmIyim3v/7NVaYM25uWlzaOzdYiYbYlETHiFh80ogQKKaU=)
+kcommunications_basic_auth_pass: ENC(FX8rvVXl6BqsCIiZ3UDDr53HBa2HhJ/D491iGKORLVr7/mpSznQE8k4mK7Owaq+cho1wPsn5ECvLPCR+j4x3veA2dqiW0Hj6ZpFodyc++Ew=)
+appconfig.webservice.url: http://lb01-config-ms.mykaarma.com/appconfig/
+kmanage_api_url_v2: http://lb01-kmanage-api.mykaarma.com/manage/v2/
+kmessaging_api_url: https://api.mykaarma.com/messaging/v2/
+kcommunications_api_url: http://communications-lb01.mykaarma.com/communications/
+outofoffice_url_v2: http://communications-lb01.mykaarma.com/outofoffice/v2/
+korder_api_url: https://api.mykaarma.com/order/v2/
+view-controller-url: http://communications-lb01.mykaarma.com/viewapi
+opt_out_email_url: http://api.mykaarma.com/messaging/v2/optOutPage/email/message/opt_out_email_uuid
+twilio.callback.url: https://api.mykaarma.com/twilio/StatusCallback
+workflow_api_url: http://workflow-lb01.mykaarma.com/workflow/v1/
+orakle_api_url: http://communications-lb01.mykaarma.com/orakle/v1/
+ksentiment_api_url: https://api.mykaarma.com/sentiment/v1/
+message_redact_url:  http://communications-lb01.mykaarma.com/optoutclassifier/predictor/v1/redact
+follow_up_api_url: https://api.mykaarma.com/leads/
+elastic_search_base_url: https://prod-es01.mykaarma.com
+authentication_utils_api_url: http://lb01-auth-api.mykaarma.com/authenticateAndAuthorize/v2/
+dealer_app_url: https://app.mykaarma.com/
+
+commApiTwilioVoiceUrl: https://api.mykaarma.com/communications/twilio/InboundCall
+
+#Notification engine configuration
+notification-engine-url: http://communications-lb01.mykaarma.com/notification
+
+#spring jpa configurations
+spring.jpa.hibernate.naming_strategy: org.hibernate.cfg.EJB3NamingStrategy
+# Datasource Configurations
+spring.datasource:
+    mykaarma:
+        url: jdbc:mysql://db.kaar.biz:3306/KaarDBProd?useUnicode=yes&characterEncoding=utf8&serverTimezone=PST
+        username: mk_communications_api
+        password: E87P2cEEuKkh3zR4
+    communications:
+        url: jdbc:mysql://mykaarma-customer-db01.mykaarma.com:3306/CommunicationsDB?useUnicode=yes&characterEncoding=utf8&serverTimezone=UTC
+        username: mk_communications_api
+        password: thq98Crh4mBqGEZ5
+
+# rabbit mq config
+initialexpiration.customermerging: 5000
+multiplier.customermerging: 3
+customerMongoMergeThreads: 1
+customerMergePrefetchCount: 10
+rabbitmq:
+  common:
+    host: general-nlb-rmq.mykaarma.com
+    port: 5672
+    username: kaarmaapp
+    password: 513CE3BDB39860E9779C2AEB
+    consumers-min: 10
+    consumers-max: 20
+    prefetch-count: 20
+    dead-letter-exchange: commonrabbit.dl
+
+  communications:
+    host: communication-nlb-rmq.mykaarma.com
+    port: 5672
+    username: kaarmaapp
+    password: 513CE3BDB39860E9779C2AEB
+    consumers-min: 10
+    consumers-max: 20
+    prefetch-count: 20
+    dead-letter-exchange: communicationsrabbit.dl
+
+
+# redis connection details  
+redis.env: prod
+redis-sentinel1: 10.0.12.111:26379
+redis-sentinel2: 10.0.12.112:26379
+redis-sentinel3: 10.0.12.113:26379
+redis-password: xnA5H3$fX4rv0p#2e&&j
+redis-max-total: 400
+redis-max-idle: 100
+redis-timeout: 5000
+cache-expiry-hours: 36
+redis-master: mymaster
+
+communications-redis:
+    host-name: master.prod-communication-redis.ernft8.use1.cache.amazonaws.com
+    port: 6379
+    password: 7orzS7CBEHzct0G2
+    max-total: 400
+    max-idle: 100
+    timeout: 5000
+    env: prod
+    master: mymaster
+    useSSL: true
+
+#mongo-db configurations
+mongo.userName: mk_communication_api
+mongo.credDb: admin
+mongo.dataDb: kaarmadb
+mongo.password: BUbMcQQmbfnbUfwN
+mongo.replicaHost1: pr-mo-communication1.mykaarma.com
+mongo.replicaHost2: pr-mo-communication2.mykaarma.com
+mongo.replicaPort1: 27017
+mongo.replicaPort2: 27017
+mongo.replicaHost3: dr-mo-communication1.mykaarma.com
+mongo.replicaPort3: 27017
+mongo.W: 1
+mongo.fsync: true
+mongo.connectionsPerHost: 10
+mongo.connectTimeout: 7000
+mongo.maxWaitTime: 7000
+mongo.socketKeepAlive: true
+mongo.socketTimeout: 12000
+mongo.threadsAllowedToBlockForConnectionMultiplier: 10
+
+message-view-controller-url: http://communications-lb01.mykaarma.com/viewapi
+feature-email-host:  smtp.postmarkapp.com
+feature-email-port: 2525
+feature-email-username: 0d1f01f2-4207-4f11-a44b-baa935c9059d
+feature-email-password: 0d1f01f2-4207-4f11-a44b-baa935c9059d
+
+awsAccessKey: ENC(+CLsSeCOcqQrXKn0BwPR2q2AHnPIYmYLEcp1bLo9Du+mZzcQHQ+BgjPyIEhZ25z6iJA6x8M0OTCJAHentNzK/g==)
+awsSecretKey: ENC(JTEwVmgZJRTxJj9qTndlPALaxWFSv0Ni2uif0kDovmWeo9h2DHOgDlx8IqybW4oh4blbq2zlB22N7glucGDTZ2RrKiPyOgEGpumaEU2qap4=)
+awsBucket: mk-communications-files
+cfURLPrefix: https://communication-files.mykaarma.com/
+
+awsAccessKeyVideo: ENC(xoSoEIXvqdWEqoorOo7bbSTnz9Nn0zFX4ngzCr+ZV7PLvdT45L+5h4b/Qul1GCZaSBbH6ZNL5dShXq3Drs96Cw==)
+awsSecretKeyVideo: ENC(qwTqtVPjagEflKH1qo40kZKmNx1YikAryrqaAIcoP/o3IzkxxdtnGbyyswUFJ7OcmhTE8Kzo26LkTaXSkOuPtDVjpTGMdxwWydkBTWvjayA=)
+awsVideoInputBucket: mykaarmavideoinput
+awsVideoOutputBucket: mykaarmavideooutput
+awsVideoOutputBucketUrl: https://s3.amazonaws.com/mykaarmavideooutput
+awsEncoderPipelineId: ENC(n2TQKViwH7WdTmjBYq0NiRQx/1j2jYSARIaOHman/FBkU5j8yv2rPHPALTaeqUw4U69Yd9DFgYaM1josI5DP5A==)
+awsEncoderPresentId: ENC(tFLfVcHaT1ST3bkaYn8bGrN2MFTnrxddrtxeO6D8p7F9zsboylRE11H/FYMaLx8wuhunR7ZKxEXlRj/RTJGauQ==)
+
+krulesengine.url: http://communications-lb01.mykaarma.com/kre
+
+twilioMasterAccountSid: ENC(dWVZ1NCyAr1FBmIDYQptDK5HmoG1xr67cG793UiTK7Mpq64tT0AEjWT5SxEmIVsdxQgQCm64G+CCEsLUuLqF6+C+h1vk9auF5JMaa6p22A8=)
+twilioMasterAccountAuthToken: ENC(URLC/S03PpdQsIdeRydmECRhOH1kgi2KwgC/vBwYk2S5f0T7wAHAQEibBRqfcLddgPPNGswH3n6FPnOlhgi3E7O0w/I2ZfdR5SNgnqHYk24=)
+
+google.cloud.auth: ENC(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)
+---
+spring.profiles: prod-de
+
+base_url: https://app.mykaarma.de/
+twilio_base_url: https://api.mykaarma.de/communications/twilio/
+twilio_announce_greeting_number: +17149022497
+
+# twilio out-of-office bot details
+twilio:
+  botaccount:
+    sid: ENC(vdI+aegBgh9p6Hhvsyv/7Gj9Qmymu9z8X8l8KjxSerHbTwnxzcqcwDbIYRJchUTp121qBesCb/JE/Og8hOU7TEtyn3vEsa6UJkXhaDzQaD4=)
+    authToken: ENC(SYLN/bfTvsYMVbHzXgEHvTF4beWxmXOU+6/QW/t8EYjDkwEbjSU8yZMDU5tIdTm9IzNjHEQlq7SHyTuXvbcDO++9LFW5AD0Lf8nmH1A7P4o=)
+    number: 14084783858
+
+#Google Speech Api
+bucket.name: mykaarma_speech_transcription
+api.key: AIzaSyB-H3_mMkeXLrDHla_vo67bqNw3Agm_908
+status.url: https://speech.googleapis.com/v1/operations/
+transcribe.url: https://speech.googleapis.com/v1/speech:longrunningrecognize
+
+out-of-office.receiver.url: http://communications-lb01.mykaarma.com/outofoffice
+
+# APIs
+kcustomer_api_url_v2: https://api.mykaarma.de/customer/v2/
+kcommunications_basic_auth_user: ENC(XgDntGkR9YyGLDmM1+wQUHOzDRvFmFpSyy55aHOOt1g7eKwYtjvJ/8tQt94RlUmIyim3v/7NVaYM25uWlzaOzdYiYbYlETHiFh80ogQKKaU=)
+kcommunications_basic_auth_pass: ENC(FX8rvVXl6BqsCIiZ3UDDr53HBa2HhJ/D491iGKORLVr7/mpSznQE8k4mK7Owaq+cho1wPsn5ECvLPCR+j4x3veA2dqiW0Hj6ZpFodyc++Ew=)
+appconfig.webservice.url: http://lb01-config-ms.mykaarma.de/appconfig/
+kmanage_api_url_v2: http://lb01-kmanage-api.mykaarma.de/manage/v2/
+kmessaging_api_url: https://api.mykaarma.de/messaging/v2/
+kcommunications_api_url: http://lb01-communications.mykaarma.de/communications/
+outofoffice_url_v2: http://lb01-communications.mykaarma.de/outofoffice/v2/
+korder_api_url: https://api.mykaarma.de/order/v2/
+view-controller-url: http://lb01-communications.mykaarma.de/viewapi
+opt_out_email_url: http://api.mykaarma.de/messaging/v2/optOutPage/email/message/opt_out_email_uuid
+twilio.callback.url: https://api.mykaarma.de/twilio/StatusCallback
+workflow_api_url: http://lb01-workflow.mykaarma.de/workflow/v1/
+orakle_api_url: http://lb01-communications.mykaarma.de/orakle/v1/
+ksentiment_api_url: https://api.mykaarma.de/sentiment/v1/
+message_redact_url:  http://lb01-communications.mykaarma.de/optoutclassifier/predictor/v1/redact
+follow_up_api_url: https://api.mykaarma.de/leads/
+dealer_app_url: https://app.mykaarma.de/
+
+#Notification engine configuration
+notification-engine-url: http://lb01-communications.mykaarma.de/notification
+
+#spring jpa configurations
+spring.jpa.hibernate.naming_strategy: org.hibernate.cfg.EJB3NamingStrategy
+# Datasource Configurations
+spring.datasource:
+    mykaarma:
+        url: jdbc:mysql://mykaardbprod-rds01.mykaarma.de:3306/KaarDBProd?useUnicode=yes&characterEncoding=utf8&serverTimezone=UTC
+        username: mk_communications_api
+        password: E87P2cEEuKkh3zR4
+    communications:
+        url: jdbc:mysql://mykaardbprod-rds01.mykaarma.de:3306/CommunicationsDB?useUnicode=yes&characterEncoding=utf8&serverTimezone=UTC
+        username: mk_communications_api
+        password: thq98Crh4mBqGEZ5
+
+# rabbit mq config
+spring.rabbitmq.host: lb-communication-rmq-c7.aws.mykaarma.de
+spring.rabbitmq.port: 5672
+spring.rabbitmq.username: RMQGERCOMM
+spring.rabbitmq.password: FEB2021GERCOMM
+
+
+# redis connection details
+redis.env: aws-redis
+redis.host.name: master.prod-de-redis.xvci5b.euc1.cache.amazonaws.com
+redis.port: 6379
+redis-password: 7orzS7CBEHzct0G1
+redis-max-total: 400
+redis-max-idle: 100
+redis-timeout: 5000
+
+communications-redis:
+    host-name: master.prod-de-redis.xvci5b.euc1.cache.amazonaws.com
+    port: 6379
+    password: 7orzS7CBEHzct0G1
+    max-total: 400
+    max-idle: 100
+    timeout: 5000
+    env: prod-de
+    master: mymaster
+    useSSL: true
+
+
+#mongo-db configurations
+mongo.userName: mk_kaarmaprod
+mongo.credDb: admin
+mongo.dataDb: kaarmadb
+mongo.password: rJdMYuhdezvJ7Rzw
+mongo.replicaHost1: mongo-common-master.mykaarma.de
+mongo.replicaHost2: mongo-common-slave.mykaarma.de
+mongo.replicaPort1: 27017
+mongo.replicaPort2: 27017
+mongo.replicaHost3: mongo-common-arb.mykaarma.de
+mongo.replicaPort3: 27017
+mongo.W: 1
+mongo.fsync: true
+mongo.connectionsPerHost: 10
+mongo.connectTimeout: 7000
+mongo.maxWaitTime: 7000
+mongo.socketKeepAlive: true
+mongo.socketTimeout: 12000
+mongo.threadsAllowedToBlockForConnectionMultiplier: 10
+
+message-view-controller-url: http://lb01-communications.mykaarma.de/viewapi
+feature-email-host:  smtp.postmarkapp.com
+feature-email-port: 2525
+feature-email-username: af2d526c-d810-4742-bca6-889383b75c54
+feature-email-password: af2d526c-d810-4742-bca6-889383b75c54
+
+awsAccessKey: ENC(/PBU4ePMIsWlu2EUELOG9/V3mNNY6O1+c9Q2a/uEWatUtT17rY2RxyAh2F91kQ8gYBZ60nEdEEfGxuBeBDM0KA==)
+awsSecretKey: ENC(Z3z3suscn/EPxGT4DhIOhNqLJ6aYpiPz02nXEGx91lrx0REaBI++hyDEZPS8Wg1s4D/ZpGjiDBA0ecV4BrHAE/uqwsjLzcV41aoRymYGFYc=)
+awsBucket: communication-files.mykaarma.de
+cfURLPrefix: https://communication-files.mykaarma.de/
+awsRegion: eu-central-1
+
+krulesengine.url: http://lb01-communications.mykaarma.de/kre
+
+twilioMasterAccountSid: ENC(dWVZ1NCyAr1FBmIDYQptDK5HmoG1xr67cG793UiTK7Mpq64tT0AEjWT5SxEmIVsdxQgQCm64G+CCEsLUuLqF6+C+h1vk9auF5JMaa6p22A8=)
+twilioMasterAccountAuthToken: ENC(URLC/S03PpdQsIdeRydmECRhOH1kgi2KwgC/vBwYk2S5f0T7wAHAQEibBRqfcLddgPPNGswH3n6FPnOlhgi3E7O0w/I2ZfdR5SNgnqHYk24=)
+
+google.cloud.auth: ENC(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)

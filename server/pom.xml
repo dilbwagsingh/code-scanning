@@ -1,0 +1,407 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.mykaarma</groupId>
+	<artifactId>kcommunications-server</artifactId>
+	<version>2.33.5</version>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.0.0.RELEASE</version>
+	</parent>
+
+	<name>kcommunications-server</name>
+	<url>http://maven.apache.org</url>
+	<description>kcommunications-server to be used by kcommunications-client</description>
+
+	<properties>
+		<java.version>1.8</java.version>
+        <springfox-version>2.9.2</springfox-version>
+		<docker.image.prefix>578061096415.dkr.ecr.us-east-1.amazonaws.com</docker.image.prefix>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
+	</properties>
+
+	<!-- AWS EventBridge -->
+	<dependencyManagement>
+	  <dependencies>
+	    <dependency>
+	      <groupId>software.amazon.awssdk</groupId>
+	      <artifactId>bom</artifactId>
+	      <version>2.15.50</version>
+	      <type>pom</type>
+	      <scope>import</scope>
+	    </dependency>
+	  </dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+
+   	<dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-actuator</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>io.micrometer</groupId>
+		<artifactId>micrometer-core</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>io.micrometer</groupId>
+		<artifactId>micrometer-registry-prometheus</artifactId>
+	</dependency>
+	<dependency>
+    <groupId>org.mnode.ical4j</groupId>
+    <artifactId>ical4j</artifactId>
+    <version>1.0.2</version>
+	</dependency>
+	
+
+	<dependency>
+		<groupId>org.springframework.security</groupId>
+		<artifactId>spring-security-web</artifactId>
+	</dependency>
+	<dependency>
+        <groupId>com.mykaarma</groupId>
+        <artifactId>leads-client</artifactId>
+        <version>1.11.4</version>
+    </dependency>
+	<dependency>
+	  <groupId>com.twilio.sdk</groupId>
+	  <artifactId>twilio</artifactId>
+	  <version>8.2.0</version>
+	</dependency>
+	
+	 <dependency>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-translate</artifactId>
+      <version>v2-rev51-1.25.0</version>
+    </dependency>
+	
+	<dependency>
+	 	<groupId>com.mykaarma</groupId>
+	 	<artifactId>kcommunications-model</artifactId>
+	 	<version>1.44.0</version>
+	</dependency>
+	<dependency>
+        <groupId>com.mykaarma</groupId>
+        <artifactId>orakle-client</artifactId>
+        <version>0.1.0</version>
+    </dependency>
+	<dependency>
+	     <groupId>org.apache.httpcomponents</groupId>
+	     <artifactId>httpclient</artifactId>
+	     <version>4.5.13</version>
+	</dependency>
+	<dependency>
+			<groupId>com.mykaarma</groupId>
+			<artifactId>awesome-workflow-client</artifactId>
+      		<version>1.2.1</version>
+    </dependency>
+	
+	<dependency>
+	 	<groupId>com.mykaarma</groupId>
+	 	<artifactId>kmanage-client</artifactId>
+	 	<version>3.14.0</version>
+	</dependency>
+	
+	<dependency>
+	 	<groupId>com.mykaarma</groupId>
+	 	<artifactId>kcustomer-client</artifactId>
+	 	<version>1.27.1</version>
+	</dependency>
+	
+	<dependency>
+		<groupId>com.mykaarma</groupId>
+		<artifactId>korder-client</artifactId>
+		<version>3.0.0</version>
+	</dependency>
+
+	<dependency>
+		<groupId>com.mykaarma</groupId>
+		<artifactId>authentication-utils-client</artifactId>
+		<version>1.3.2</version>
+		<exclusions>
+			<exclusion>
+				<groupId>com.mykaarma</groupId>
+				<artifactId>mykaarma-utils</artifactId>
+			</exclusion>
+		</exclusions>
+	</dependency>
+	
+	<dependency>
+	 	<groupId>com.mykaarma</groupId>
+	 	<artifactId>mykaarma-utils</artifactId>
+		<version>19.17.0</version>
+	</dependency>
+	
+	<dependency>
+	    	<groupId>com.mykaarma</groupId>
+			<artifactId>mykaarma-dms-utils</artifactId>
+			<version>3.0.0</version>
+    </dependency>
+    
+    <dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>${org.mapstruct.version}</version>
+	</dependency>
+
+	<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct-processor</artifactId>
+			<version>${org.mapstruct.version}</version>
+	</dependency>
+		
+	<dependency>
+		<groupId>com.kaarya</groupId>
+		<artifactId>com.kaarya.services</artifactId>
+		<version>2.2.1</version>
+	</dependency>
+	
+	<dependency>
+ 		<groupId>com.github.ben-manes.caffeine</groupId>
+ 		<artifactId>caffeine</artifactId>
+	</dependency>
+	
+    <dependency>
+	    <groupId>io.springfox</groupId>
+	    <artifactId>springfox-swagger2</artifactId>
+	    <version>${springfox-version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>io.springfox</groupId>
+	    <artifactId>springfox-swagger-ui</artifactId>
+	    <version>${springfox-version}</version>
+	</dependency>
+    
+	<dependency>
+	    <groupId>org.jsoup</groupId>
+	    <artifactId>jsoup</artifactId>
+	    <version>1.14.2</version>
+	</dependency>
+	
+	<dependency>
+	    <groupId>javax.mail</groupId>
+	    <artifactId>javax.mail-api</artifactId>
+	     <version>1.5.6</version>
+	</dependency>
+	
+
+	<dependency>
+	    <groupId>com.sun.mail</groupId>
+	    <artifactId>javax.mail</artifactId>
+	    <version>1.5.6</version>
+	</dependency>
+	
+	<dependency>
+	    <groupId>commons-net</groupId>
+	    <artifactId>commons-net</artifactId>
+	    <version>3.6</version>
+	</dependency>
+	
+	<dependency>
+		<groupId>com.mykaarma.templateengine</groupId>
+		<artifactId>mykaarma-template-engine</artifactId>
+		<version>1.1.0</version>
+	</dependency>
+	
+	<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-amqp</artifactId>
+	</dependency>
+	<dependency>
+   		 <groupId>org.springframework.integration</groupId>
+   		 <artifactId>spring-integration-redis</artifactId>
+    </dependency>
+	<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-data-mongodb</artifactId>
+	</dependency>
+	<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+	</dependency>
+	<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+	</dependency>
+	<dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.16</version><!--$NO-MVN-MAN-VER$-->
+    </dependency>
+	<dependency>
+       <groupId>net.minidev</groupId>
+       <artifactId>json-smart</artifactId>
+       <version>2.4.1</version>
+    </dependency>
+ 
+ 	<dependency>
+    	<groupId>com.googlecode.json-simple</groupId>
+    	<artifactId>json-simple</artifactId>
+    	<version>1.1</version>
+	</dependency>
+     <dependency>
+    		<groupId>com.google.code.gson</groupId>
+    		<artifactId>gson</artifactId>
+	</dependency>
+	<dependency>
+    		<groupId>org.apache.commons</groupId>
+   		 <artifactId>commons-io</artifactId>
+    		<version>1.3.2</version>
+	</dependency>
+ 	<dependency>
+    		<groupId>joda-time</groupId>
+    		<artifactId>joda-time</artifactId>
+    		<version>2.10.1</version>
+	</dependency>
+	<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-redis</artifactId>
+	</dependency>
+	<dependency>
+    		<groupId>redis.clients</groupId>
+    		<artifactId>jedis</artifactId>
+	</dependency>
+	<dependency>
+    		<groupId>org.json</groupId>
+    		<artifactId>json</artifactId>
+    		<version>20180813</version>
+	</dependency>
+	
+	<dependency>
+		  <groupId>com.amazonaws</groupId>
+		  <artifactId>aws-java-sdk-s3</artifactId>
+		  <version>1.11.500</version>
+	 </dependency>
+	  <dependency>
+		  <groupId>com.amazonaws</groupId>
+		  <artifactId>aws-java-sdk-elastictranscoder</artifactId>
+		  <version>1.11.500</version>
+	  </dependency>
+	  <dependency>
+	    <groupId>com.amazonaws</groupId>
+	    <artifactId>aws-java-sdk-kms</artifactId>
+	    <version>1.11.500</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.amazonaws</groupId>
+	    <artifactId>aws-java-sdk-core</artifactId>
+	    <version>1.11.500</version>
+	</dependency>
+	
+  	<dependency>
+		<groupId>org.apache.tika</groupId>
+		<artifactId>tika-core</artifactId>
+		<version>1.22</version>
+  	</dependency>
+	
+	<dependency>
+	    <groupId>com.github.ulisesbocchio</groupId>
+	    <artifactId>jasypt-spring-boot-starter</artifactId>
+	    <version>2.1.2</version>
+	</dependency>
+
+	<dependency>
+		<groupId>com.googlecode.libphonenumber</groupId>
+		<artifactId>libphonenumber</artifactId>
+		<version>8.12.25</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.mongodb</groupId>
+		<artifactId>mongo-java-driver</artifactId>
+		<version>3.12.8</version>
+	</dependency>
+
+	<!-- AWS EventBridge -->
+	<dependency>
+		<groupId>software.amazon.awssdk</groupId>
+		<artifactId>eventbridge</artifactId>
+	</dependency>
+	
+	<dependency>
+		  <groupId>com.google.cloud</groupId>
+		  <artifactId>google-cloud-storage</artifactId>
+		  <version>0.8.0-beta</version>
+  	</dependency>
+  	
+  	<dependency>
+		<groupId>com.mykaarma</groupId>
+		<artifactId>korder-model</artifactId>
+		<version>3.18.0</version>
+	</dependency>
+
+	<dependency>
+		<groupId>com.mykaarma</groupId>
+		<artifactId>outofoffice-client</artifactId>
+		<version>0.0.2</version>
+	</dependency>
+	  
+   </dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<configuration>
+					<imageName>${docker.image.prefix}/kcommunications-server</imageName>
+					<dockerDirectory>src/main/docker</dockerDirectory>
+					<resources>
+						<resource>
+							<targetPath>/</targetPath>
+							<directory>${project.build.directory}</directory>
+							<include>${project.build.finalName}.jar</include>
+						</resource>
+					</resources>
+				</configuration>
+			</plugin>
+			
+			
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>central</id>
+			<name>Central Repository</name>
+			<url>https://repo.maven.apache.org/maven2</url>
+		</repository>
+		<repository>
+			<id>ci02.kaar.biz</id>
+			<name>ci01.kaar.biz-releases</name>
+			<url>https://ci.kaar-ma.com/artifactory/libs-release</url>
+		</repository>
+
+		<repository>
+			<id>ci04.kaar.biz</id>
+			<name>ci04.kaar.biz-snapshots</name>
+			<url>https://ci.kaar-ma.com/artifactory/libs-snapshot</url>
+		</repository>
+
+		<repository>
+			<id>spring-releases</id>
+			<url>https://repo.spring.io/libs-release</url>
+		</repository>
+	</repositories>
+
+</project>

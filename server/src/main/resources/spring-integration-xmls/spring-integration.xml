@@ -1,0 +1,825 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-stream="http://www.springframework.org/schema/integration/stream"
+	xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
+	xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/integration
+		http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/integration/amqp 
+		http://www.springframework.org/schema/integration/amqp/spring-integration-amqp.xsd
+		http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd
+		http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit.xsd">
+
+	<import resource="rabbit-queues.xml" />
+
+	<!-- for message sending -->
+	<int:channel id="messageSendingChannel" />
+	<int:channel id="errorChannelMessageSending"/>
+	<int:channel id="fromKCommunicationsProcessingErrorHandler"/>
+	<int:service-activator input-channel="messageSendingChannel"
+		ref="KCommunicationsRequestProcessor" method="sendMessage" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="messageSendingChannel" error-channel="errorChannelMessageSending"
+		queue-names="mykaarma.communications.api.message.send" concurrent-consumers="${CommunicationsMessageSendConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSendQueuePreFetchCount}" />
+
+
+	<int:service-activator input-channel="errorChannelMessageSending" output-channel="fromKCommunicationsProcessingErrorHandler" 
+		ref="errorhelper" method="onErrorInKCommunicationsProcessing" />
+
+	<int:header-enricher input-channel="fromKCommunicationsProcessingErrorHandler" output-channel="toKCommunicationsProcessingErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForMessage" />
+	</int:header-enricher>
+	
+	<int:channel id="fromKCommunicationsProcessingRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromKCommunicationsProcessingRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.message.send.wait.key" />
+	<int:channel id="fromKCommunicationsProcessingRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromKCommunicationsProcessingRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.message.send.failed.key" />
+		
+	<!-- for message sending without customer -->
+	<int:channel id="messageWithoutCustomerSendingChannel" />
+	<int:channel id="errorChannelMessageWithoutCustomerSending"/>
+	<int:channel id="fromKCommunicationsMessageWithoutCustomerProcessingErrorHandler"/>
+	
+	<int:service-activator input-channel="messageWithoutCustomerSendingChannel"
+		ref="KCommunicationsRequestProcessor" method="sendMessageWithoutCustomer" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="messageWithoutCustomerSendingChannel" error-channel="errorChannelMessageWithoutCustomerSending"
+		queue-names="mykaarma.communications.api.message.without.customer.send" concurrent-consumers="1"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="20" />
+
+
+	<int:service-activator input-channel="errorChannelMessageWithoutCustomerSending" output-channel="fromKCommunicationsMessageWithoutCustomerProcessingErrorHandler" 
+		ref="errorhelper" method="onErrorInKCommunicationsMessageWithoutCustomerProcessing" />
+
+	<int:header-enricher input-channel="fromKCommunicationsMessageWithoutCustomerProcessingErrorHandler" output-channel="toKCommunicationsMessageWithoutCustomerProcessingErrorMessageRouter">
+		<int:header name="amqp_expiration" ref="errorhelper" method="updateExpirationForMessageWithoutCustomer" />
+	</int:header-enricher>
+	
+	<int:channel id="fromKCommunicationsMessageWithoutCustomerProcessingRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromKCommunicationsMessageWithoutCustomerProcessingRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.message.without.customer.send.wait.key" />
+	<int:channel id="fromKCommunicationsMessageWithoutCustomerProcessingRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromKCommunicationsMessageWithoutCustomerProcessingRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.message.without.customer.send.failed.key" />
+		
+	<!-- for message saving -->
+	<int:channel id="messageSavingChannel" />
+	<int:channel id="errorChannelMessageSaving"/>
+
+	<int:service-activator input-channel="messageSavingChannel"
+		ref="KCommunicationsRequestProcessor" method="saveMessage" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="messageSavingChannel" error-channel="errorChannelMessageSaving"
+		queue-names="mykaarma.communications.api.message.save" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+
+
+	<int:service-activator input-channel="errorChannelMessageSaving" output-channel="fromKCommunicationsProcessingErrorHandler" 
+		ref="errorhelper" method="onErrorInKCommunicationsProcessing" />
+
+	<int:header-enricher input-channel="fromKCommunicationsProcessingErrorHandler" output-channel="toKCommunicationsProcessingErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForMessage" />
+	</int:header-enricher>
+	
+	<int:channel id="fromMessageSavingErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromMessageSavingErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.message.save.wait.key" />
+	<int:channel id="fromMessageSavingErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromMessageSavingErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.message.save.failed.key" />
+		
+	
+	
+	<!-- for template indexing queue -->	
+	
+	<int:channel id="templateIndexingChannel" />
+	<int:channel id="errorChannelTemplateIndexing"/>
+
+	<int:service-activator input-channel="templateIndexingChannel"
+		ref="KCommunicationsRequestProcessor" method="indexTemplate" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="templateIndexingChannel" error-channel="errorChannelTemplateIndexing"
+		queue-names="mykaarma.communications.template.index" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+
+
+	<int:service-activator input-channel="errorChannelTemplateIndexing" output-channel="fromKCommunicationsTemplateIndexingErrorHandler" 
+		ref="errorhelper" method="onErrorInTemplateIndexing" />
+
+	<int:header-enricher input-channel="fromKCommunicationsTemplateIndexingErrorHandler" output-channel="toKCommunicationsTemplateIndexingErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForTemplateIndexing" />
+	</int:header-enricher>
+	
+	<int:channel id="fromTemplateIndexingErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromTemplateIndexingErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.template.index.wait.key" />
+	<int:channel id="fromTemplateIndexingErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromTemplateIndexingErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.template.index.failed.key" />
+		
+	
+	
+	<!-- for post message sending -->
+	<int:channel id="postMessageSendingChannel" />
+	<int:channel id="errorChannelPostMessageSending"/>
+
+	<int:service-activator input-channel="postMessageSendingChannel"
+		ref="KCommunicationsRequestProcessor" method="postMessageSent" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="postMessageSendingChannel" error-channel="errorChannelPostMessageSending"
+		queue-names="mykaarma.communications.api.post.message.send" concurrent-consumers="${CommunicationsPostMessageSendConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsPostMessageSendQueuePreFetchCount}" />
+
+
+	<int:service-activator input-channel="errorChannelPostMessageSending" output-channel="fromKCommunicationsPostMessageProcessingErrorHandler" 
+		ref="errorhelper" method="onErrorInPostMessageProcessing" />
+
+	<int:header-enricher input-channel="fromKCommunicationsPostMessageProcessingErrorHandler" output-channel="toKCommunicationsPostMessageProcessingErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForPostMessageSent" />
+	</int:header-enricher>
+	
+	<int:channel id="fromKCommunicationsPostMessageProcessingRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromKCommunicationsPostMessageProcessingRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.post.message.send.wait.key" />
+	<int:channel id="fromKCommunicationsPostMessageProcessingRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromKCommunicationsPostMessageProcessingRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.post.message.send.failed.key" />
+
+	<!-- For Post Incoming Message Save Processing	-->
+	<int:channel id="postIncomingMessageSaveChannel" />
+	<int:channel id="errorChannelPostIncomingMessageSave"/>
+
+	<int:service-activator input-channel="postIncomingMessageSaveChannel"
+   			ref="KCommunicationsRequestProcessor" method="postIncomingMessageSave" />
+
+	<int-amqp:inbound-channel-adapter
+			channel="postIncomingMessageSaveChannel" error-channel="errorChannelPostIncomingMessageSave"
+			queue-names="mykaarma.communications.api.post.incoming.message.save" concurrent-consumers="${CommunicationsPostIncomingMessageSaveConcurrentConsumers}"
+			connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+			prefetch-count="${CommunicationsPostIncomingMessageSaveQueuePreFetchCount}" />
+
+	<int:service-activator input-channel="errorChannelPostIncomingMessageSave" output-channel="fromKCommunicationsPostIncomingMessageSaveProcessingErrorHandler"
+   			ref="errorhelper" method="onErrorInPostIncomingMessageSaveProcessing" />
+
+	<int:header-enricher input-channel="fromKCommunicationsPostIncomingMessageSaveProcessingErrorHandler" output-channel="toKCommunicationsPostIncomingMessageSaveProcessingErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForPostIncomingMessageSave" />
+	</int:header-enricher>
+
+	<int:channel id="fromKCommunicationsPostIncomingMessageSaveProcessingRouterWait" />
+	<int-amqp:outbound-channel-adapter
+			channel="fromKCommunicationsPostIncomingMessageSaveProcessingRouterWait" amqp-template="rabbitTemplate"
+			exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.post.incoming.message.save.wait.key" />
+	<int:channel id="fromKCommunicationsPostIncomingMessageSaveProcessingRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+			channel="fromKCommunicationsPostIncomingMessageSaveProcessingRouterFailed" amqp-template="rabbitTemplate"
+			exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.post.incoming.message.save.failed.key" />
+
+	<!-- For Post Universal Message Send Processing	-->
+	<int:channel id="postUniversalMessageSendChannel" />
+	<int:channel id="errorChannelPostUniversalMessageSend"/>
+
+	<int:service-activator input-channel="postUniversalMessageSendChannel"
+		   	ref="KCommunicationsRequestProcessor" method="postUniversalMessageSend" />
+
+	<int-amqp:inbound-channel-adapter
+			channel="postUniversalMessageSendChannel" error-channel="errorChannelPostUniversalMessageSend"
+			queue-names="mykaarma.communications.api.post.universal.message.send" concurrent-consumers="${CommunicationsPostUniversalMessageSendConcurrentConsumers}"
+			connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+			prefetch-count="${CommunicationsPostUniversalMessageSendQueuePreFetchCount}" />
+
+	<int:service-activator input-channel="errorChannelPostUniversalMessageSend" output-channel="fromKCommunicationsPostUniversalMessageSendProcessingErrorHandler"
+						   ref="errorhelper" method="onErrorInPostUniversalMessageSendProcessing" />
+
+	<int:header-enricher input-channel="fromKCommunicationsPostUniversalMessageSendProcessingErrorHandler" output-channel="toKCommunicationsPostUniversalMessageSendProcessingErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForPostUniversalMessageSend" />
+	</int:header-enricher>
+
+	<int:channel id="fromKCommunicationsPostUniversalMessageSendProcessingRouterWait" />
+	<int-amqp:outbound-channel-adapter
+			channel="fromKCommunicationsPostUniversalMessageSendProcessingRouterWait" amqp-template="rabbitTemplate"
+			exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.post.universal.message.send.wait.key" />
+	<int:channel id="fromKCommunicationsPostUniversalMessageSendProcessingRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+			channel="fromKCommunicationsPostUniversalMessageSendProcessingRouterFailed" amqp-template="rabbitTemplate"
+			exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.post.universal.message.send.failed.key" />
+
+	<!-- for post message event processing -->
+	<int:channel id="eventProcessingChannel" />
+	<int:channel id="errorChannelEventProcessing"/>
+
+	<int:service-activator input-channel="eventProcessingChannel"
+		ref="KCommunicationsRequestProcessor" method="eventProcessor" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="eventProcessingChannel" error-channel="errorChannelEventProcessing"
+		queue-names="mykaarma.communications.event.processing" concurrent-consumers="${CommunicationsPostMessageSendConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsPostMessageSendQueuePreFetchCount}" />
+
+
+	<int:service-activator input-channel="errorChannelEventProcessing" output-channel="fromKCommunicationsEventProcessingErrorHandler" 
+		ref="errorhelper" method="onErrorInEventProcessing" />
+
+	<int:header-enricher input-channel="fromKCommunicationsEventProcessingErrorHandler" output-channel="toKCommunicationsEventProcessingErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForEventProcessor" />
+	</int:header-enricher>
+	
+	<int:channel id="fromKCommunicationsEventProcessingRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromKCommunicationsEventProcessingRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.event.processing.wait.key" />
+	<int:channel id="fromKCommunicationsEventProcessingRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromKCommunicationsEventProcessingRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.event.processing.failed.key" />
+	
+	<!-- for taking post message received actions -->
+	<int:channel id="postMessageReceivedChannel" />
+	<int:channel id="errorChannelPostMessageReceived"/>
+	
+	<int:service-activator input-channel="postMessageReceivedChannel"
+		ref="KCommunicationsRequestProcessor" method="takeActionsPostMessageReceived" />
+		
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="postMessageReceivedChannel" error-channel="errorChannelPostMessageReceived"
+		queue-names="mykaarma.communications.post.message.received" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+		
+	<int:service-activator input-channel="errorChannelPostMessageReceived" output-channel="postMessageReceivedErrorMessageHandler" 
+		ref="errorhelper" method="onErrorInPostMessageReceived" />
+		
+	<int:header-enricher input-channel="postMessageReceivedErrorMessageHandler" output-channel="postMessageReceivedErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForPostMessageReceived" />
+	</int:header-enricher>
+	
+	<int:channel id="postMessageReceivedErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="postMessageReceivedErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.post.message.received.wait.key" />
+	<int:channel id="postMessageReceivedErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="postMessageReceivedErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.post.message.received.failed.key" />
+	
+	<!-- for fetching messages for dealer -->
+	<int:channel id="fetchMessagesForDealerChannel" />
+	<int:channel id="errorChannelFecthingMessagesForDealer"/>
+
+	<int:service-activator input-channel="fetchMessagesForDealerChannel"
+		ref="KCommunicationsRequestProcessor" method="fetchMessagesForDealer" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="fetchMessagesForDealerChannel" error-channel="errorChannelFecthingMessagesForDealer"
+		queue-names="mykaarma.communications.api.dealer.update.recording.url" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+
+
+	<int:service-activator input-channel="errorChannelFecthingMessagesForDealer" output-channel="fromFecthingMessagesForDealerErrorMessageHandler" 
+		ref="errorhelper" method="onErrorInFetchingMessagesForDealer" />
+
+	<int:header-enricher input-channel="fromFecthingMessagesForDealerErrorMessageHandler" output-channel="toFecthingMessagesForDealerErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForFetchingMessagesForDealer" />
+	</int:header-enricher>
+	
+	<int:channel id="fromFecthingMessagesForDealerErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromFecthingMessagesForDealerErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.dealer.update.recording.url.wait.key" />
+	<int:channel id="fromFecthingMessagesForDealerErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromFecthingMessagesForDealerErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.dealer.update.recording.url.failed.key" />
+	
+	
+	
+	<!-- for updating recording url for message -->
+	<int:channel id="updateRecordingUrlForMessageChannel" />
+	<int:channel id="errorChannelUpdateRecordingUrlForMessage"/>
+	
+	<int:service-activator input-channel="updateRecordingUrlForMessageChannel"
+		ref="KCommunicationsRequestProcessor" method="updateRecordingURLForMessage" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="updateRecordingUrlForMessageChannel" error-channel="errorChannelUpdateRecordingUrlForMessage"
+		queue-names="mykaarma.communications.api.message.update.recording.url" concurrent-consumers="${CommunicationsMessageRecordingURLUpdateConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+
+	<int:service-activator input-channel="errorChannelUpdateRecordingUrlForMessage" output-channel="fromUpdatingRecordingUrlForMessageErrorMessageHandler" 
+		ref="errorhelper" method="onErrorInUpdatingRecordingURLForMessage" />
+
+	<int:header-enricher input-channel="fromUpdatingRecordingUrlForMessageErrorMessageHandler" output-channel="toUpdatingRecordingUrlForMessageErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForUpdatingRecordingURLForMessage" />
+	</int:header-enricher>
+	
+	<int:channel id="fromUpdatingRecordingUrlForMessageErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromUpdatingRecordingUrlForMessageErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.message.update.recording.url.wait.key" />
+	<int:channel id="fromUpdatingRecordingUrlForMessageErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromUpdatingRecordingUrlForMessageErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.message.update.recording.url.failed.key" />
+	
+	
+	
+	<!-- for multiple message sending -->
+	<int:channel id="multipleMessageSendingChannel" />
+	<int:channel id="errorChannelMultipleMessageSending"/>
+	<int:channel id="fromMultipleMessageProcessingErrorHandler"/>
+	<int:service-activator input-channel="multipleMessageSendingChannel"
+		ref="KCommunicationsRequestProcessor" method="sendMultipleMessages" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="multipleMessageSendingChannel" error-channel="errorChannelMultipleMessageSending"
+		queue-names="mykaarma.communications.api.multiple.message.send" concurrent-consumers="${CommunicationsMessageSendConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSendQueuePreFetchCount}" />
+
+
+	<int:service-activator input-channel="errorChannelMultipleMessageSending" output-channel="fromMultipleMessageProcessingErrorHandler" 
+		ref="errorhelper" method="onErrorInMultipleMessageProcessing" />
+
+	<int:header-enricher input-channel="fromMultipleMessageProcessingErrorHandler" output-channel="toMultipleMessageSendingErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForMultipleMessageSending" />
+	</int:header-enricher>
+	
+	<int:channel id="fromMultipleMessageSendingErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromMultipleMessageSendingErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.multiple.message.send.wait.key" />
+	<int:channel id="fromMultipleMessageSendingErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromMultipleMessageSendingErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.multiple.message.send.failed.key" />
+		
+	
+	
+	
+	<!-- for mailing threads -->
+	<int:channel id="mailCustomerThreadChannel" />
+	<int:channel id="errorChannelMailCustomerThread"/>
+	
+	<int:service-activator input-channel="mailCustomerThreadChannel"
+		ref="KCommunicationsRequestProcessor" method="mailCustomerThread" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="mailCustomerThreadChannel" error-channel="errorChannelMailCustomerThread"
+		queue-names="mykaarma.communications.api.mail.customer.thread" concurrent-consumers="${CommunicationsMessageRecordingURLUpdateConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+
+	<int:service-activator input-channel="errorChannelMailCustomerThread" output-channel="fromMailCustomerThreadErrorMessageHandler" 
+		ref="errorhelper" method="onErrorInMailingCustomerThread" />
+
+	<int:header-enricher input-channel="fromMailCustomerThreadErrorMessageHandler" output-channel="toMailCustomerThreadErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForMailingCustomerThread" />
+	</int:header-enricher>
+	
+	<int:channel id="fromMailCustomerThreadErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromMailCustomerThreadErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.mail.customer.thread.wait.key" />
+	<int:channel id="fromMailCustomerThreadErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromMailCustomerThreadErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.mail.customer.thread.failed.key" />
+		
+	<!-- -delayed filter update -->
+	
+	<int:channel id="delayedFilterUpdateChannel" />
+	<int-amqp:inbound-channel-adapter
+		channel="delayedFilterUpdateChannel" error-channel="errorChannelDelayedFilterUpdate"
+		queue-names="mykaarma.delayed.filter.update" concurrent-consumers="${CommunicationsMessageSendConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSendQueuePreFetchCount}" />
+	
+	<int:service-activator input-channel="delayedFilterUpdateChannel"
+		ref="KCommunicationsRequestProcessor" method="removeMessagesFromDelayedFilter" />
+
+	<int:channel id="delayedFilterUpdateChannelErrorHandler" />
+	<int:service-activator id="errorHandlerDelayedFilterUpdate"
+		input-channel="errorChannelDelayedFilterUpdate" output-channel="delayedFilterUpdateChannelErrorHandler"
+		ref="errorhelper" method="onErrorInDelayedFilterUpdate" />
+	
+	<int:header-enricher input-channel="delayedFilterUpdateChannelErrorHandler"
+		output-channel="toDelayedFilterUpdateChannelErrorHandlerErrorMessageRouter">
+		<int:header name="amqp_expiration" method="updateExpirationForDelayedFilterUpdate"
+			ref="errorhelper" />
+	</int:header-enricher>
+
+	<int:channel id="fromDelayedFilterUpdateErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromDelayedFilterUpdateErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.delayed.filter.update.exchange" routing-key="mykaarma.delayed.filter.update.wait.key" />
+
+	<int:channel id="fromDelayedFilterUpdateErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromDelayedFilterUpdateErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.delayed.filter.update.exchange" routing-key="mykaarma.delayed.filter.update.failed.key" />
+		
+	
+	<!-- for fetching customers for dealer -->
+	<int:channel id="fetchCustomersForDealerChannel" />
+	<int:channel id="errorChannelFecthingCustomersForDealer"/>
+
+	<int:service-activator input-channel="fetchCustomersForDealerChannel"
+		ref="KCommunicationsRequestProcessor" method="fetchCustomersForDealer" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="fetchCustomersForDealerChannel" error-channel="errorChannelFecthingCustomersForDealer"
+		queue-names="mykaarma.communications.api.subscription.update.dealer" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+
+
+	<int:service-activator input-channel="errorChannelFecthingCustomersForDealer" output-channel="fromFecthingCustomersForDealerErrorMessageHandler" 
+		ref="errorhelper" method="onErrorInFetchingCustomersForDealer" />
+
+	<int:header-enricher input-channel="fromFecthingCustomersForDealerErrorMessageHandler" output-channel="toFecthingCustomersForDealerErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForFetchingCustomersForDealer" />
+	</int:header-enricher>
+	
+	<int:channel id="fromFecthingCustomersForDealerErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromFecthingCustomersForDealerErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.subscription.update.dealer.wait.key" />
+	<int:channel id="fromFecthingCustomersForDealerErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromFecthingCustomersForDealerErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.subscription.update.dealer.failed.key" />
+	
+	
+	<!-- for removing ownership of users who are not thread owner -->
+	<int:channel id="updateCustomerSubscribersChannel" />
+	<int:channel id="errorChannelUpdatingCustomerSubscriptions"/>
+
+	<int:service-activator input-channel="updateCustomerSubscribersChannel"
+		ref="KCommunicationsRequestProcessor" method="updateCustomerSubscribers" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="updateCustomerSubscribersChannel" error-channel="errorChannelUpdatingCustomerSubscriptions"
+		queue-names="mykaarma.communications.api.subscription.update.customer" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+
+	
+	<int:service-activator input-channel="errorChannelUpdatingCustomerSubscriptions" output-channel="fromUpdatingCustomerSubscriptionsErrorMessageHandler" 
+		ref="errorhelper" method="onErrorInUpdatingCustomerSubscriptions" />
+
+	<int:header-enricher input-channel="fromUpdatingCustomerSubscriptionsErrorMessageHandler" output-channel="toUpdatingCustomerSubscriptionsErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForUpdatingCustomerSubscriptions" />
+	</int:header-enricher>
+	
+	<int:channel id="fromUpdatingCustomerSubscriptionsErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromUpdatingCustomerSubscriptionsErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.subscription.update.customer.wait.key" />
+	<int:channel id="fromUpdatingCustomerSubscriptionsErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromUpdatingCustomerSubscriptionsErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.subscription.update.customer.failed.key" />
+
+    <!-- for predicting preferred communication mode of customer -->
+    <int:channel id="preferredCommunicationModePredictingChannel" />
+    <int:channel id="errorChannelPreferredCommunicationModePredicting"/>
+    <int:service-activator input-channel="preferredCommunicationModePredictingChannel"
+        ref="KCommunicationsRequestProcessor" method="predictPreferredCommunicationModeReceiver" />
+    
+    <!-- recommended to use 1 concurrent consumer for low volume queues -->
+    <int-amqp:inbound-channel-adapter
+        channel="preferredCommunicationModePredictingChannel" error-channel="errorChannelPreferredCommunicationModePredicting" queue-names="mykaarma.communications.api.preferred.communication.mode.predict" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+        connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+        prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+    
+    <int:service-activator input-channel="errorChannelPreferredCommunicationModePredicting" output-channel="fromPreferredCommunicationModePredictionErrorHandler" 
+        ref="errorhelper" method="onErrorInPreferredCommunicationModePrediction" />
+    
+    <int:header-enricher input-channel="fromPreferredCommunicationModePredictionErrorHandler" output-channel="toPreferredCommunicationModePredictionErrorMessageRouter">
+        <int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForPreferredCommunicationModePrediction" />
+    </int:header-enricher>
+    
+    <int:channel id="fromPreferredCommunicationModePredictionErrorMessageRouterWait" />
+    <int-amqp:outbound-channel-adapter
+        channel="fromPreferredCommunicationModePredictionErrorMessageRouterWait" amqp-template="rabbitTemplate"
+        exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.preferred.communication.mode.predict.wait.key" />
+    <int:channel id="fromPreferredCommunicationModePredictionErrorMessageRouterFailed" />
+    <int-amqp:outbound-channel-adapter
+    channel="fromPreferredCommunicationModePredictionErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+        exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.preferred.communication.mode.predict.failed.key" />
+
+	
+	<!-- for verification of communications done -->
+	<int:channel id="verifyCommunicationsChannel" />
+	<int:channel id="errorVerifyCommunicationsChannel"/>
+
+	<int:service-activator input-channel="verifyCommunicationsChannel"
+		ref="KCommunicationsRequestProcessor" method="verifyCommunicationsBillingTwilio" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="verifyCommunicationsChannel" error-channel="errorVerifyCommunicationsChannel"
+		queue-names="mykaarma.communications.scheduler.verification" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+
+	
+	<int:service-activator input-channel="errorVerifyCommunicationsChannel" output-channel="fromVerifyCommunicationsErrorMessageHandler" 
+		ref="errorhelper" method="onErrorVerifyCommunications" />
+
+	<int:header-enricher input-channel="fromVerifyCommunicationsErrorMessageHandler" output-channel="toVerifyCommunicationsErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForVerifyCommunications" />
+	</int:header-enricher>
+	
+	<int:channel id="fromVerifyCommunicationsErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromVerifyCommunicationsErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.scheduler.exchange" routing-key="mykaarma.communications.scheduler.verification.wait.key" />
+	<int:channel id="fromVerifyCommunicationsErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromVerifyCommunicationsErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.scheduler.exchange" routing-key="mykaarma.communications.scheduler.verification.failed.key" />
+
+	<!-- for updating optoutstatus of customer -->
+    <int:channel id="optOutStatusUpdateChannel" />
+    <int:channel id="errorChannelOptOutStatusUpdate"/>
+    <int:service-activator input-channel="optOutStatusUpdateChannel"
+        ref="KCommunicationsRequestProcessor" method="updateOptOutStatusReceiver" />
+    
+    <!-- recommended to use 1 concurrent consumer for low volume queues -->
+    <int-amqp:inbound-channel-adapter
+        channel="optOutStatusUpdateChannel" error-channel="errorChannelOptOutStatusUpdate" queue-names="mykaarma.communications.optoutstatus.update" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+        connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+        prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+    
+    <int:service-activator input-channel="errorChannelOptOutStatusUpdate" output-channel="fromOptOutStatusUpdateErrorHandler" 
+        ref="errorhelper" method="onErrorInOptOutStatusUpdate" />
+    
+    <int:header-enricher input-channel="fromOptOutStatusUpdateErrorHandler" output-channel="toOptOutStatusUpdateErrorMessageRouter">
+        <int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForOptOutStatusUpdate" />
+    </int:header-enricher>
+    
+    <int:channel id="fromOptOutStatusUpdateErrorMessageRouterWait" />
+    <int-amqp:outbound-channel-adapter
+        channel="fromOptOutStatusUpdateErrorMessageRouterWait" amqp-template="rabbitTemplate"
+        exchange-name="mykaarma.communications.optoutstatus.exchange" routing-key="mykaarma.communications.optoutstatus.update.wait.key" />
+    <int:channel id="fromOptOutStatusUpdateErrorMessageRouterFailed" />
+    <int-amqp:outbound-channel-adapter
+    channel="fromOptOutStatusUpdateErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+        exchange-name="mykaarma.communications.optoutstatus.exchange" routing-key="mykaarma.communications.optoutstatus.update.failed.key" />
+
+
+	<!-- for post optoutstatus update of customer -->
+    <int:channel id="postOptOutStatusUpdateChannel" />
+    <int:channel id="errorChannelPostOptOutStatusUpdate"/>
+    <int:service-activator input-channel="postOptOutStatusUpdateChannel"
+        ref="KCommunicationsRequestProcessor" method="postOptOutStatusUpdateReceiver" />
+    
+    <!-- recommended to use 1 concurrent consumer for low volume queues -->
+    <int-amqp:inbound-channel-adapter
+        channel="postOptOutStatusUpdateChannel" error-channel="errorChannelPostOptOutStatusUpdate" queue-names="mykaarma.communications.optoutstatus.post.update" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+        connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+        prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+    
+    <int:service-activator input-channel="errorChannelPostOptOutStatusUpdate" output-channel="fromPostOptOutStatusUpdateErrorHandler" 
+        ref="errorhelper" method="onErrorInPostOptOutStatusUpdate" />
+    
+    <int:header-enricher input-channel="fromPostOptOutStatusUpdateErrorHandler" output-channel="toPostOptOutStatusUpdateErrorMessageRouter">
+        <int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForPostOptOutStatusUpdate" />
+    </int:header-enricher>
+    
+    <int:channel id="fromPostOptOutStatusUpdateErrorMessageRouterWait" />
+    <int-amqp:outbound-channel-adapter
+        channel="fromPostOptOutStatusUpdateErrorMessageRouterWait" amqp-template="rabbitTemplate"
+        exchange-name="mykaarma.communications.optoutstatus.exchange" routing-key="mykaarma.communications.optoutstatus.post.update.wait.key" />
+    <int:channel id="fromPostOptOutStatusUpdateErrorMessageRouterFailed" />
+    <int-amqp:outbound-channel-adapter
+    channel="fromPostOptOutStatusUpdateErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+        exchange-name="mykaarma.communications.optoutstatus.exchange" routing-key="mykaarma.communications.optoutstatus.post.update.failed.key" />
+
+	<!-- for double optin deployment -->
+    <int:channel id="doubleOptinDeploymentChannel" />
+    <int:channel id="errorChannelDoubleOptinDeployment"/>
+    <int:service-activator input-channel="doubleOptinDeploymentChannel"
+        ref="KCommunicationsRequestProcessor" method="deployDoubleOptinReceiver" />
+    
+    <!-- recommended to use 1 concurrent consumer for low volume queues -->
+    <int-amqp:inbound-channel-adapter
+        channel="doubleOptinDeploymentChannel" error-channel="errorChannelDoubleOptinDeployment" queue-names="mykaarma.communications.optoutstatus.doubleoptin.deploy" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+        connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+        prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+    
+    <int:service-activator input-channel="errorChannelDoubleOptinDeployment" output-channel="fromDoubleOptinDeploymentErrorHandler" 
+        ref="errorhelper" method="onErrorInDoubleOptinDeployment" />
+    
+    <int:header-enricher input-channel="fromDoubleOptinDeploymentErrorHandler" output-channel="toDoubleOptinDeploymentErrorMessageRouter">
+        <int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForDoubleOptinDeployment" />
+    </int:header-enricher>
+    
+    <int:channel id="fromDoubleOptinDeploymentErrorMessageRouterWait" />
+    <int-amqp:outbound-channel-adapter
+        channel="fromDoubleOptinDeploymentErrorMessageRouterWait" amqp-template="rabbitTemplate"
+        exchange-name="mykaarma.communications.optoutstatus.exchange" routing-key="mykaarma.communications.optoutstatus.doubleoptin.deploy.wait.key" />
+    <int:channel id="fromDoubleOptinDeploymentErrorMessageRouterFailed" />
+    <int-amqp:outbound-channel-adapter
+    channel="fromDoubleOptinDeploymentErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+        exchange-name="mykaarma.communications.optoutstatus.exchange" routing-key="mykaarma.communications.optoutstatus.doubleoptin.deploy.failed.key" />
+
+	<!-- for expiring optin awaiting message -->
+	<int:channel id="optinAwaitingMessageExpireChannel" />
+	<int:channel id="errorChannelOptinAwaitingMessageExpire"/>
+	<int:service-activator input-channel="optinAwaitingMessageExpireChannel"
+	   ref="KCommunicationsRequestProcessor" method="optinAwaitingMessageExpireReceiver" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="optinAwaitingMessageExpireChannel" error-channel="errorChannelOptinAwaitingMessageExpire" queue-names="mykaarma.communications.api.optin.awaiting.message.expire" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+
+	<int:service-activator input-channel="errorChannelOptinAwaitingMessageExpire" output-channel="fromOptinAwaitingMessageExpireErrorHandler"
+   		ref="errorhelper" method="onErrorInOptinAwaitingMessageExpire" />
+
+	<int:header-enricher input-channel="fromOptinAwaitingMessageExpireErrorHandler" output-channel="toOptinAwaitingMessageExpireErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForOptinAwaitingMessageExpire" />
+	</int:header-enricher>
+
+	<int:channel id="fromOptinAwaitingMessageExpireErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+			channel="fromOptinAwaitingMessageExpireErrorMessageRouterWait" amqp-template="rabbitTemplate"
+			exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.optin.awaiting.message.expire.wait.key" />
+	<int:channel id="fromOptinAwaitingMessageExpireErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+			channel="fromOptinAwaitingMessageExpireErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+			exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.optin.awaiting.message.expire.failed.key" />
+
+
+
+	<!-- for verification of communications done -->
+	<int:channel id="historicalCommunicationsSaveChannel" />
+	<!-- <int:channel id="errorHistoricalCommunicationsSaveChannel"/> -->
+
+	<int:service-activator input-channel="historicalCommunicationsSaveChannel"
+		ref="KCommunicationsRequestProcessor" method="saveHistoricalCommunications" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="historicalCommunicationsSaveChannel" error-channel="errorHistoricalCommunicationsSaveChannel"
+		queue-names="mykaarma.communications.historical.message.save" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+		connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+
+
+	<int:service-activator input-channel="errorHistoricalCommunicationsSaveChannel" output-channel="fromHistoricalCommunicationsSaveErrorMessageHandler"
+		ref="errorhelper" method="onErrorSavingHistoricalCommunications" />
+
+	<int:header-enricher input-channel="fromHistoricalCommunicationsSaveErrorMessageHandler" output-channel="toHistoricalCommunicationsSaveErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForSavingHistoricalCommunications" />
+	</int:header-enricher>
+
+	<int:channel id="fromHistoricalCommunicationsSaveErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromHistoricalCommunicationsSaveErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.historical.message.save.wait.key" />
+	<int:channel id="fromHistoricalCommunicationsSaveErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromHistoricalCommunicationsSaveErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.historical.message.save.failed.key" />
+
+
+
+
+	<!-- for changing thread owner on ro creation -->
+	<int:channel id="threadOwnerChangeOnROCreationChannel" />
+
+	<int:service-activator input-channel="threadOwnerChangeOnROCreationChannel"
+		ref="KCommunicationsRequestProcessor" method="receiveMessageFromGlobalDealerOrderUpdatesQueue" />
+
+	<!-- recommended to use 1 concurrent consumer for low volume queues -->
+	<int-amqp:inbound-channel-adapter
+		channel="threadOwnerChangeOnROCreationChannel" error-channel="errorThreadOwnerChangeOnROCreationChannel"
+		queue-names="mykaarma.communications.global.order.events.queue" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+		connection-factory="commonRabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+		prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+
+
+	<int:service-activator input-channel="errorThreadOwnerChangeOnROCreationChannel" output-channel="fromThreadOwnerChangeOnROCreationChannelErrorMessageHandler"
+		ref="errorhelper" method="onErrorChangingThreadOwnerChangeOnROCreation" />
+
+	<int:header-enricher input-channel="fromThreadOwnerChangeOnROCreationChannelErrorMessageHandler" output-channel="toThreadOwnerChangeOnROCreationChannelErrorHandler">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForChangingThreadOwnerChangeOnROCreation" />
+	</int:header-enricher>
+
+	<int:channel id="fromThreadOwnerChangeOnROCreationChannelErrorMessageRouterWait" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromThreadOwnerChangeOnROCreationChannelErrorMessageRouterWait" amqp-template="rabbitTemplate"
+		exchange-name="dms.order.transition.publish.exchange" routing-key="mykaarma.communications.global.order.events.wait.key" />
+	<int:channel id="fromThreadOwnerChangeOnROCreationChannelErrorMessageRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+		channel="fromThreadOwnerChangeOnROCreationChannelErrorMessageRouterFailed" amqp-template="rabbitTemplate"
+		exchange-name="dms.order.transition.publish.exchange" routing-key="mykaarma.communications.global.order.events.failed.key" />
+	
+	
+	<int:channel id="mergeCustomerMongoChannel"/>
+    <int:channel id="errorChannelMongoMerge" />
+    
+    <int-amqp:inbound-channel-adapter
+        channel="mergeCustomerMongoChannel" error-channel="errorChannelMongoMerge"
+        queue-names="mykaarma.communication.customer.mongo.merge" concurrent-consumers="${customerMongoMergeThreads}"
+        connection-factory="commonRabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+        prefetch-count="${customerMergePrefetchCount}" id="fromMergeMongoQueue" />
+
+    <int:service-activator input-channel="mergeCustomerMongoChannel"
+        ref="mergeCustomerService" method="handlePostMergeRequest" />
+
+
+    <int:channel id="fromCustomerMongoMergeErrorHandler" />
+    <int:service-activator id="errorHandlerMongoMerge"
+        input-channel="errorChannelMongoMerge" output-channel="fromCustomerMongoMergeErrorHandler"
+        ref="errorhelper" method="onErrorInCustomerMongoMerge" />
+    <int:header-enricher input-channel="fromCustomerMongoMergeErrorHandler"
+        output-channel="toCustomerMongoMergeErrorMessageRouter">
+        <int:header name="amqp_expiration" method="updateExpirationForCustomerMerging"
+            ref="errorhelper" />
+    </int:header-enricher>
+    <int:channel id="fromCustomerMongoMergeErrorMessageRouterWait" />
+    <int-amqp:outbound-channel-adapter
+        channel="fromCustomerMongoMergeErrorMessageRouterWait" amqp-template="commonRmqTemplate"
+        exchange-name="mykaarma.customer.exchange" routing-key="mykaarma.communication.customer.mongo.merge.wait.key" />
+    <int:channel id="fromCustomerMongoMergeErrorMessageRouterFailed" />
+    <int-amqp:outbound-channel-adapter
+        channel="fromCustomerMongoMergeErrorMessageRouterFailed"
+        amqp-template="commonRmqTemplate" exchange-name="mykaarma.customer.exchange"
+        routing-key="mykaarma.communication.customer.mongo.merge.failed.key" />
+
+
+	<!-- For Post Incoming Bot Message Save Processing	-->
+	<int:channel id="postIncomingBotMessageSaveChannel" />
+	<int:channel id="errorChannelPostIncomingBotMessageSave"/>
+
+	<int:service-activator input-channel="postIncomingBotMessageSaveChannel"
+						   ref="KCommunicationsRequestProcessor" method="postIncomingBotMessageSave" />
+
+	<int-amqp:inbound-channel-adapter
+			channel="postIncomingBotMessageSaveChannel" error-channel="errorChannelPostIncomingBotMessageSave"
+			queue-names="mykaarma.communications.api.post.incoming.bot.message.save" concurrent-consumers="${CommunicationsMessageSaveConcurrentConsumers}"
+			connection-factory="rabbitConnectionFactory" header-mapper="kCommunicationsHeaderMapper"
+			prefetch-count="${CommunicationsMessageSaveQueuePreFetchCount}" />
+
+	<int:service-activator input-channel="errorChannelPostIncomingBotMessageSave" output-channel="fromKCommunicationsPostIncomingBotMessageSaveErrorHandler"
+						   ref="errorhelper" method="onErrorInPostIncomingBotMessageSave" />
+
+	<int:header-enricher input-channel="fromKCommunicationsPostIncomingBotMessageSaveErrorHandler" output-channel="toKCommunicationsPostIncomingBotMessageSaveErrorMessageRouter">
+		<int:header name="amqp_expiration"  ref="errorhelper" method="updateExpirationForPostIncomingBotMessageSave" />
+	</int:header-enricher>
+
+	<int:channel id="fromKCommunicationsPostIncomingBotMessageSaveRouterWait" />
+	<int-amqp:outbound-channel-adapter
+			channel="fromKCommunicationsPostIncomingBotMessageSaveRouterWait" amqp-template="rabbitTemplate"
+			exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.post.incoming.bot.message.save.wait.key" />
+	<int:channel id="fromKCommunicationsPostIncomingBotMessageSaveRouterFailed" />
+	<int-amqp:outbound-channel-adapter
+			channel="fromKCommunicationsPostIncomingBotMessageSaveRouterFailed" amqp-template="rabbitTemplate"
+			exchange-name="mykaarma.communications.api" routing-key="mykaarma.communications.api.post.incoming.bot.message.save.failed.key" />
+</beans>

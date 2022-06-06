@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:rabbit="http://www.springframework.org/schema/rabbit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit.xsd">
+	
+	<rabbit:queue name="mykaarma.communications.global.order.events.queue" >
+	<rabbit:queue-arguments value-type="java.lang.Long">
+	        <entry key="x-message-ttl" value="1800000"/>
+	</rabbit:queue-arguments></rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.global.order.events.wait.queue" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="dms.order.transition.publish.exchange"/>
+			<entry key="x-dead-letter-routing-key" value="dms.order.transition.publish.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.global.order.events.failed.queue"/>
+	
+	<rabbit:queue name="mykaarma.communications.api.message.send" >
+	<rabbit:queue-arguments value-type="java.lang.Long">
+	        <entry key="x-message-ttl" value="1800000"/>
+	</rabbit:queue-arguments></rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.message.send.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.message.send.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.message.send.failed"/>
+	
+	<rabbit:queue name="mykaarma.communications.api.message.without.customer.send" >
+	<rabbit:queue-arguments value-type="java.lang.Long">
+	        <entry key="x-message-ttl" value="1800000"/>
+	</rabbit:queue-arguments></rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.message.without.customer.send.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.message.without.customer.send.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.message.without.customer.send.failed"/>
+	
+	<rabbit:queue name="mykaarma.communications.template.index" />
+	<rabbit:queue name="mykaarma.communications.template.index.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.template.index.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.template.index.failed"/>
+	
+	<rabbit:queue name="mykaarma.communications.api.message.save" />
+	<rabbit:queue name="mykaarma.communications.api.message.save.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.message.save.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.message.save.failed"/>
+	
+	<rabbit:queue name="mykaarma.communications.api.post.message.send" />
+	<rabbit:queue name="mykaarma.communications.api.post.message.send.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.post.message.send.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.post.message.send.failed"/>
+	
+	<rabbit:queue name="mykaarma.communications.event.processing" />
+	<rabbit:queue name="mykaarma.communications.event.processing.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.event.processing.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.event.processing.failed"/>
+	
+	<rabbit:queue name="mykaarma.communications.post.message.received" />
+	<rabbit:queue name="mykaarma.communications.post.message.received.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.post.message.received.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.post.message.received.failed"/>
+	
+	<rabbit:queue name="mykaarma.communications.api.dealer.update.recording.url" />
+	<rabbit:queue name="mykaarma.communications.api.dealer.update.recording.url.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.dealer.update.recording.url.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.dealer.update.recording.url.failed"/>
+	
+	<rabbit:queue name="mykaarma.communications.api.message.update.recording.url"/>
+	<rabbit:queue name="mykaarma.communications.api.message.update.recording.url.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.message.update.recording.url.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.message.update.recording.url.delayed" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.message.update.recording.url.key"/>
+			<entry key="x-message-ttl" value="3600000" value-type="java.lang.Long"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.message.update.recording.url.failed"/>
+	
+	<rabbit:queue name="mykaarma.communications.api.multiple.message.send" >
+	<rabbit:queue-arguments value-type="java.lang.Long">
+	        <entry key="x-message-ttl" value="1800000"/>
+	</rabbit:queue-arguments></rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.multiple.message.send.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.multiple.message.send.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.multiple.message.send.failed"/>
+	
+	<rabbit:queue name="mykaarma.communications.api.mail.customer.thread" />
+	<rabbit:queue name="mykaarma.communications.api.mail.customer.thread.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.mail.customer.thread.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.mail.customer.thread.failed"/>
+	
+	<rabbit:queue name="mykaarma.communications.api.subscription.update.dealer" />
+	<rabbit:queue name="mykaarma.communications.api.subscription.update.dealer.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.subscription.update.dealer.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.subscription.update.dealer.failed"/>
+	
+	<rabbit:queue name="mykaarma.communications.api.subscription.update.customer" />
+	<rabbit:queue name="mykaarma.communications.api.subscription.update.customer.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.subscription.update.customer.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.subscription.update.customer.failed"/>
+	
+    <rabbit:queue name="mykaarma.communications.api.preferred.communication.mode.predict" />
+    <rabbit:queue name="mykaarma.communications.api.preferred.communication.mode.predict.wait" >
+        <rabbit:queue-arguments>
+            <entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+            <entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.preferred.communication.mode.predict.key"/>
+        </rabbit:queue-arguments> 
+    </rabbit:queue>
+    <rabbit:queue name= "mykaarma.communications.api.preferred.communication.mode.predict.failed"/>
+
+	<rabbit:queue name="mykaarma.communications.api.post.incoming.message.save" />
+	<rabbit:queue name="mykaarma.communications.api.post.incoming.message.save.wait" >
+		<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.post.incoming.message.save.key"/>
+		</rabbit:queue-arguments>
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.post.incoming.message.save.failed"/>
+
+	<rabbit:queue name="mykaarma.communications.api.post.incoming.bot.message.save" />
+	<rabbit:queue name="mykaarma.communications.api.post.incoming.bot.message.save.wait" >
+		<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.post.incoming.bot.message.save.key"/>
+		</rabbit:queue-arguments>
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.post.incoming.bot.message.save.failed"/>
+
+	<rabbit:queue name="mykaarma.communications.api.optin.awaiting.message.expire" />
+	<rabbit:queue name="mykaarma.communications.api.optin.awaiting.message.expire.wait" >
+		<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.optin.awaiting.message.expire.key"/>
+		</rabbit:queue-arguments>
+	</rabbit:queue>
+	<rabbit:queue name= "mykaarma.communications.api.optin.awaiting.message.expire.failed"/>
+
+    <rabbit:queue name="mykaarma.communications.historical.message.save" />
+	<rabbit:queue name="mykaarma.communications.historical.message.save.wait" >
+	    <rabbit:queue-arguments>
+            <entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+            <entry key="x-dead-letter-routing-key" value="mykaarma.communications.historical.message.save.key"/>
+        </rabbit:queue-arguments>
+    </rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.historical.message.save.failed"/>
+
+	<rabbit:queue name="mykaarma.communications.api.post.universal.message.send" />
+	<rabbit:queue name="mykaarma.communications.api.post.universal.message.send.wait" >
+		<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.api"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.api.post.universal.message.send.key"/>
+		</rabbit:queue-arguments>
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.api.post.universal.message.send.failed"/>
+	
+	<rabbit:queue name="mykaarma.communication.customer.mongo.merge" />
+	<rabbit:queue name="mykaarma.communication.customer.mongo.merge.wait">
+		<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communication.customer.exchange"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communication.customer.mongo.merge.key"/>
+		</rabbit:queue-arguments>
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communication.customer.mongo.merge.failed"/>
+	
+	<rabbit:direct-exchange name="mykaarma.customer.exchange">
+		<rabbit:bindings>
+			<rabbit:binding queue="mykaarma.communication.customer.mongo.merge"
+				key="mykaarma.customer.mongo.merge.key" />
+			<rabbit:binding queue="mykaarma.communication.customer.mongo.merge.wait"
+				key="mykaarma.communication.customer.mongo.merge.wait.key" />
+			<rabbit:binding queue="mykaarma.communication.customer.mongo.merge.failed"
+				key="mykaarma.communication.customer.mongo.merge.failed.key" />
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+
+	<rabbit:direct-exchange name="dms.order.transition.publish.exchange">
+		<rabbit:bindings>
+			<rabbit:binding queue="mykaarma.communications.global.order.events.queue"
+				key="dms.order.transition.publish.key" />
+			<rabbit:binding queue="mykaarma.communications.global.order.events.wait.queue"
+				key="mykaarma.communications.global.order.events.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.global.order.events.failed.queue"
+				key="mykaarma.communications.global.order.events.failed.key" />
+
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+
+	<rabbit:direct-exchange name="mykaarma.communications.api" delayed="true">
+
+		<rabbit:bindings>
+
+			<rabbit:binding queue="mykaarma.communications.api.message.send"
+				key="mykaarma.communications.api.message.send.key" />
+			<rabbit:binding queue="mykaarma.communications.api.message.send.wait"
+				key="mykaarma.communications.api.message.send.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.message.send.failed"
+				key="mykaarma.communications.api.message.send.failed.key" />
+				
+			<rabbit:binding queue="mykaarma.communications.api.message.without.customer.send"
+				key="mykaarma.communications.api.message.without.customer.send.key" />
+			<rabbit:binding queue="mykaarma.communications.api.message.without.customer.send.wait"
+				key="mykaarma.communications.api.message.without.customer.send.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.message.without.customer.send.failed"
+				key="mykaarma.communications.api.message.without.customer.send.failed.key" />
+			
+			<rabbit:binding queue="mykaarma.communications.api.message.save"
+				key="mykaarma.communications.api.message.save.key" />
+			<rabbit:binding queue="mykaarma.communications.api.message.save.wait"
+				key="mykaarma.communications.api.message.save.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.message.save.failed"
+				key="mykaarma.communications.api.message.save.failed.key" />
+			
+			<rabbit:binding queue="mykaarma.communications.api.post.message.send"
+				key="mykaarma.communications.api.post.message.send.key" />
+			<rabbit:binding queue="mykaarma.communications.api.post.message.send.wait"
+				key="mykaarma.communications.api.post.message.send.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.post.message.send.failed"
+				key="mykaarma.communications.api.post.message.send.failed.key" />
+				
+			<rabbit:binding queue="mykaarma.communications.template.index"
+				key="mykaarma.communications.template.index.key" />
+			<rabbit:binding queue="mykaarma.communications.template.index.wait"
+				key="mykaarma.communications.template.index.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.template.index.failed"
+				key="mykaarma.communications.template.index.failed.key" />
+				
+			<rabbit:binding queue="mykaarma.communications.event.processing"
+				key="mykaarma.communications.event.processing.key" />
+			<rabbit:binding queue="mykaarma.communications.event.processing.wait"
+				key="mykaarma.communications.event.processing.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.event.processing.failed"
+				key="mykaarma.communications.event.processing.failed.key" />
+			
+			<rabbit:binding queue="mykaarma.communications.post.message.received"
+				key="mykaarma.communications.post.message.received.key" />
+			<rabbit:binding queue="mykaarma.communications.post.message.received.wait"
+				key="mykaarma.communications.post.message.received.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.post.message.received.failed"
+				key="mykaarma.communications.post.message.received.failed.key" />
+			
+			<rabbit:binding queue="mykaarma.communications.api.dealer.update.recording.url"
+				key="mykaarma.communications.api.dealer.update.recording.url.key" />
+			<rabbit:binding queue="mykaarma.communications.api.dealer.update.recording.url.wait"
+				key="mykaarma.communications.api.dealer.update.recording.url.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.dealer.update.recording.url.failed"
+				key="mykaarma.communications.api.dealer.update.recording.url.failed.key" />
+				
+			<rabbit:binding queue="mykaarma.communications.api.message.update.recording.url"
+				key="mykaarma.communications.api.message.update.recording.url.key" />
+			<rabbit:binding queue="mykaarma.communications.api.message.update.recording.url.wait"
+				key="mykaarma.communications.api.message.update.recording.url.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.message.update.recording.url.failed"
+				key="mykaarma.communications.api.message.update.recording.url.failed.key" />
+			<rabbit:binding queue="mykaarma.communications.api.message.update.recording.url.delayed"
+				key="mykaarma.communications.api.message.update.recording.url.delayed.key" />
+			
+			<rabbit:binding queue="mykaarma.communications.api.multiple.message.send"
+				key="mykaarma.communications.api.multiple.message.send.key" />
+			<rabbit:binding queue="mykaarma.communications.api.multiple.message.send.wait"
+				key="mykaarma.communications.api.multiple.message.send.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.multiple.message.send.failed"
+				key="mykaarma.communications.api.multiple.message.send.failed.key" />
+			
+			<rabbit:binding queue="mykaarma.communications.api.mail.customer.thread"
+				key="mykaarma.communications.api.mail.customer.thread.key" />
+			<rabbit:binding queue="mykaarma.communications.api.mail.customer.thread.wait"
+				key="mykaarma.communications.api.mail.customer.thread.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.mail.customer.thread.failed"
+				key="mykaarma.communications.api.mail.customer.thread.failed.key" />
+			
+			<rabbit:binding queue="mykaarma.communications.api.subscription.update.dealer"
+				key="mykaarma.communications.api.subscription.update.dealer.key" />
+			<rabbit:binding queue="mykaarma.communications.api.subscription.update.dealer.wait"
+				key="mykaarma.communications.api.subscription.update.dealer.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.subscription.update.dealer.failed"
+				key="mykaarma.communications.api.subscription.update.dealer.failed.key" />
+			
+			<rabbit:binding queue="mykaarma.communications.api.subscription.update.customer"
+				key="mykaarma.communications.api.subscription.update.customer.key" />
+			<rabbit:binding queue="mykaarma.communications.api.subscription.update.customer.wait"
+				key="mykaarma.communications.api.subscription.update.customer.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.subscription.update.customer.failed"
+				key="mykaarma.communications.api.subscription.update.customer.failed.key" />
+
+            <rabbit:binding queue="mykaarma.communications.api.preferred.communication.mode.predict"
+				key="mykaarma.communications.api.preferred.communication.mode.predict.key" />
+			<rabbit:binding queue="mykaarma.communications.api.preferred.communication.mode.predict.wait"
+				key="mykaarma.communications.api.preferred.communication.mode.predict.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.preferred.communication.mode.predict.failed"
+				key="mykaarma.communications.api.preferred.communication.mode.predict.failed.key" />
+
+			<rabbit:binding queue="mykaarma.communications.historical.message.save"
+				key="mykaarma.communications.historical.message.save.key" />
+			<rabbit:binding queue="mykaarma.communications.historical.message.save.wait"
+				key="mykaarma.communications.historical.message.save.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.historical.message.save.failed"
+				key="mykaarma.communications.historical.message.save.failed.key" />
+
+			<rabbit:binding queue="mykaarma.communications.api.post.incoming.message.save"
+							key="mykaarma.communications.api.post.incoming.message.save.key" />
+			<rabbit:binding queue="mykaarma.communications.api.post.incoming.message.save.wait"
+							key="mykaarma.communications.api.post.incoming.message.save.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.post.incoming.message.save.failed"
+							key="mykaarma.communications.api.post.incoming.message.save.failed.key" />
+
+			<rabbit:binding queue="mykaarma.communications.api.post.incoming.bot.message.save"
+							key="mykaarma.communications.api.post.incoming.bot.message.save.key" />
+			<rabbit:binding queue="mykaarma.communications.api.post.incoming.bot.message.save.wait"
+							key="mykaarma.communications.api.post.incoming.bot.message.save.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.post.incoming.bot.message.save.failed"
+							key="mykaarma.communications.api.post.incoming.bot.message.save.failed.key" />
+
+			<rabbit:binding queue="mykaarma.communications.api.optin.awaiting.message.expire"
+				key="mykaarma.communications.api.optin.awaiting.message.expire.key" />
+			<rabbit:binding queue="mykaarma.communications.api.optin.awaiting.message.expire.wait"
+				key="mykaarma.communications.api.optin.awaiting.message.expire.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.optin.awaiting.message.expire.failed"
+				key="mykaarma.communications.api.optin.awaiting.message.expire.failed.key" />
+
+			<rabbit:binding queue="mykaarma.communications.api.post.universal.message.send"
+							key="mykaarma.communications.api.post.universal.message.send.key" />
+			<rabbit:binding queue="mykaarma.communications.api.post.universal.message.send.wait"
+							key="mykaarma.communications.api.post.universal.message.send.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.api.post.universal.message.send.failed"
+							key="mykaarma.communications.api.post.universal.message.send.failed.key" />
+
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+	
+	<!-- -delayed filter update -->
+	
+	<rabbit:queue name="mykaarma.delayed.filter.update">
+		<rabbit:queue-arguments value-type="java.lang.Long">
+	        <entry key="x-message-ttl" value="1800000"/>
+	    </rabbit:queue-arguments>
+	</rabbit:queue>
+	
+	<rabbit:queue name="mykaarma.delayed.filter.update.wait">
+		<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.delayed.filter.update.exchange"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.delayed.filter.update.key"/>
+		</rabbit:queue-arguments>
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.delayed.filter.update.failed"/>
+	
+	<rabbit:direct-exchange name="mykaarma.delayed.filter.update.exchange" delayed="true">
+		<rabbit:bindings>
+			<rabbit:binding queue="mykaarma.delayed.filter.update"
+				key="mykaarma.delayed.filter.update.key" />	
+			<rabbit:binding queue="mykaarma.delayed.filter.update.wait"
+				key="mykaarma.delayed.filter.update.wait.key" />
+			<rabbit:binding queue="mykaarma.delayed.filter.update.failed"
+				key="mykaarma.delayed.filter.update.failed.key" />
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+
+	<rabbit:queue name="mykaarma.communications.scheduler.verification" />
+	<rabbit:queue name="mykaarma.communications.scheduler.verification.wait" >
+	 	<rabbit:queue-arguments>
+			<entry key="x-dead-letter-exchange" value="mykaarma.communications.scheduler.exchange"/>
+			<entry key="x-dead-letter-routing-key" value="mykaarma.communications.scheduler.verification.key"/>
+		</rabbit:queue-arguments> 
+	</rabbit:queue>
+	<rabbit:queue name="mykaarma.communications.scheduler.verification.failed"/>
+	
+	<rabbit:direct-exchange name="mykaarma.communications.scheduler.exchange" delayed="true">
+		<rabbit:bindings>
+			<rabbit:binding queue="mykaarma.communications.scheduler.verification"
+				key="mykaarma.communications.scheduler.verification.key" />
+			<rabbit:binding queue="mykaarma.communications.scheduler.verification.wait"
+				key="mykaarma.communications.scheduler.verification.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.scheduler.verification.failed"
+				key="mykaarma.communications.scheduler.verification.failed.key" />
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+
+	<rabbit:queue name="mykaarma.communications.optoutstatus.update" />
+    <rabbit:queue name="mykaarma.communications.optoutstatus.update.wait" >
+        <rabbit:queue-arguments>
+            <entry key="x-dead-letter-exchange" value="mykaarma.communications.optoutstatus.exchange"/>
+            <entry key="x-dead-letter-routing-key" value="mykaarma.communications.optoutstatus.update.key"/>
+        </rabbit:queue-arguments> 
+    </rabbit:queue>
+    <rabbit:queue name= "mykaarma.communications.optoutstatus.update.failed"/>
+
+	<rabbit:queue name="mykaarma.communications.optoutstatus.post.update" />
+    <rabbit:queue name="mykaarma.communications.optoutstatus.post.update.wait" >
+        <rabbit:queue-arguments>
+            <entry key="x-dead-letter-exchange" value="mykaarma.communications.optoutstatus.exchange"/>
+            <entry key="x-dead-letter-routing-key" value="mykaarma.communications.optoutstatus.post.update.key"/>
+        </rabbit:queue-arguments> 
+    </rabbit:queue>
+    <rabbit:queue name= "mykaarma.communications.optoutstatus.post.update.failed"/>
+
+	<rabbit:queue name="mykaarma.communications.optoutstatus.doubleoptin.deploy" />
+    <rabbit:queue name="mykaarma.communications.optoutstatus.doubleoptin.deploy.wait" >
+        <rabbit:queue-arguments>
+            <entry key="x-dead-letter-exchange" value="mykaarma.communications.optoutstatus.exchange"/>
+            <entry key="x-dead-letter-routing-key" value="mykaarma.communications.optoutstatus.doubleoptin.deploy.key"/>
+        </rabbit:queue-arguments> 
+    </rabbit:queue>
+    <rabbit:queue name= "mykaarma.communications.optoutstatus.doubleoptin.deploy.failed"/>
+    
+	<rabbit:direct-exchange name="mykaarma.communications.optoutstatus.exchange" delayed="true">
+		<rabbit:bindings>
+	
+			<rabbit:binding queue="mykaarma.communications.optoutstatus.update"
+				key="mykaarma.communications.optoutstatus.update.key" />
+			<rabbit:binding queue="mykaarma.communications.optoutstatus.update.wait"
+				key="mykaarma.communications.optoutstatus.update.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.optoutstatus.update.failed"
+				key="mykaarma.communications.optoutstatus.update.failed.key" />
+
+			<rabbit:binding queue="mykaarma.communications.optoutstatus.post.update"
+				key="mykaarma.communications.optoutstatus.post.update.key" />
+			<rabbit:binding queue="mykaarma.communications.optoutstatus.post.update.wait"
+				key="mykaarma.communications.optoutstatus.post.update.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.optoutstatus.post.update.failed"
+				key="mykaarma.communications.optoutstatus.post.update.failed.key" />
+
+			<rabbit:binding queue="mykaarma.communications.optoutstatus.doubleoptin.deploy"
+				key="mykaarma.communications.optoutstatus.doubleoptin.deploy.key" />
+			<rabbit:binding queue="mykaarma.communications.optoutstatus.doubleoptin.deploy.wait"
+				key="mykaarma.communications.optoutstatus.doubleoptin.deploy.wait.key" />
+			<rabbit:binding queue="mykaarma.communications.optoutstatus.doubleoptin.deploy.failed"
+				key="mykaarma.communications.optoutstatus.doubleoptin.deploy.failed.key" />
+
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+	
+</beans>

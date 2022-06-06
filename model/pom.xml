@@ -1,0 +1,108 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.mykaarma</groupId>
+  <artifactId>kcommunications-model</artifactId>
+  <version>1.44.0</version>
+  <packaging>jar</packaging>
+
+  <name>kcommunications-model</name>
+  <description>kcommunications-model to be used by both client and server</description>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+  	<java.version>1.8</java.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+		<groupId>org.projectlombok</groupId>
+		<artifactId>lombok</artifactId>
+		<version>1.18.22</version>
+    </dependency>
+    <dependency>
+    		<groupId>com.fasterxml.jackson.core</groupId>
+    		<artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+		  <groupId>commons-fileupload</groupId>
+		  <artifactId>commons-fileupload</artifactId>
+		  <version>1.4</version>
+		</dependency>
+		<dependency>
+	    	<groupId>commons-io</groupId>
+	    	<artifactId>commons-io</artifactId>
+	    	<version>2.10.0</version>
+		</dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+	  <dependency>
+		  <groupId>jakarta.xml.bind</groupId>
+		  <artifactId>jakarta.xml.bind-api</artifactId>
+		  <version>2.3.3</version>
+	  </dependency>
+
+  </dependencies>
+  
+  <dependencyManagement>
+  	<dependencies>
+  		<dependency>
+  			<groupId>org.springframework.boot</groupId>
+  			<artifactId>spring-boot-dependencies</artifactId>
+  			<version>1.5.12.RELEASE</version>
+  			<type>pom</type>
+  			<scope>import</scope>
+  		</dependency>
+	    
+  		<dependency>
+	 		<groupId>com.mykaarma</groupId>
+	 		<artifactId>kcustomer-model</artifactId>
+	 		<version>1.2.3</version>
+	 		<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+  	</dependencies>
+  </dependencyManagement>
+  
+  <build>
+    		<sourceDirectory>src/main/java</sourceDirectory>
+    		<resources>
+    			<resource>
+    				<directory>src/main/java</directory>
+    			</resource>
+    		</resources>
+    
+    		<plugins>
+    			<plugin>
+    				<groupId>org.apache.maven.plugins</groupId>
+    				<artifactId>maven-compiler-plugin</artifactId>
+    				<version>3.5.1</version>
+    				<configuration>
+    					<source>1.8</source>
+    					<target>1.8</target>
+    				</configuration>
+    			</plugin>
+    		</plugins>
+  	</build>
+  
+  <repositories>
+  	<repository>
+  		<id>ci02.kaar.biz</id>
+  		<name>ci01.kaar.biz-releases</name>
+  		<url>https://ci.kaar-ma.com/artifactory/libs-release</url>
+  	</repository>
+  	<repository>
+  		<id>ci04.kaar.biz</id>
+  		<name>ci04.kaar.biz-snapshots</name>
+  		<url>https://ci.kaar-ma.com/artifactory/libs-snapshot</url>
+  	</repository>
+  </repositories>
+</project>

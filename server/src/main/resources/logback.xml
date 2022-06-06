@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <jmxConfigurator/>
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${PID:- } --- [%15.15t{14}] %-40.40logger{39} --- %5p ${PID:- } --- message_id=%X{loguuid} : %m%n"/>
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>/var/log/kaarya/kcommunications-api-v2.log</file>
+            <encoder>
+                <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            </encoder>
+    </appender>
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="REQUEST_LOGS" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/kaarya/kcommunications-api-requests.log</file>
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.mykaarma.kcommunications.filter.LoggingFilter" level="INFO" additivity="true">
+        <appender-ref ref="REQUEST_LOGS"/>
+    </logger>
+    <root level="INFO">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="stdout"/>
+    </root>
+</configuration>
